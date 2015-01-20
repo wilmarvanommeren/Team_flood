@@ -6,78 +6,60 @@ library(sp)
 library(raster)
 library(RColorBrewer)
 library(igraph)
+library(rgeos)
 
 # Load source scripts
 source('./r/fill.up.R')
 source('./r/create.breach.R')
 
 # Load data
-DEM <- raster("data/AHN 5m/ahn_wageningen_5m.tif")
-
-# Filled up DEM, no breach
-waterheight <- 7#meter
-DEM.filled <- fill.up(DEM, waterheight)
-
-# Plot flooded areas
-colorPal <- colorRampPalette(brewer.pal(9, "Blues"))(20) # Create color palette
-# spplot (DEM.filled,col.regions = colorPal, main='Waterheight [m]')
-
-# Filled up DEM, single breach
+DEM <- raster("data/AHN 5m/ahn2_5_65az1.tif")
 plot(DEM)
-breach<-drawExtent(show=T, col='red')
-breachRast <- crop(DEM,breach)
-breachRast <- create.breach(breachRast)
-DEMwithbreach<-mosaic(DEM,breachRast,fun=min)
-DEMwithbreach.filled <- fill.up(DEMwithbreach, waterheight)
-# spplot (DEMwithbreach.filled,col.regions = colorPal, main='Waterheight [m]')
 
-# Clump flooded areas
-clumps.flood<-clump(DEMwithbreach.filled)
-clumps.floodEMP <- setValues(raster(clumps.flood), 1)#create empty raster
-clumps.floodEMP[is.na(clumps.flood)] <- NA #set NA values
-clumps.flood<-clump(clumps.floodEMP) #clump connected flooded area's
+# Project parameter(s)
+waterheight <- 2#meter
+breach.point <- click()
+breach.width = 150
+breach.height = 0
 
-# Select clumps connected to breach
-clump.intersect<-intersect(clumps.flood, breach)
-clumps.breach<-unique(clump.intersect@data@values)
-clumps.flood[clumps.flood!=clumps.breach]<-NA
+# Plot colorPallettes
+Watercol <- colorRampPalette(brewer.pal(9, "Blues"))(20) 
 
-# Set values in connected clump
-flood.values <- mask(DEMwithbreach.filled, clumps.flood)
-spplot (flood.values,col.regions = colorPal, main='Waterheight [m]')
+# Create spatial breach point
+breach.point<-data.frame(breach.point)
+coordinates(breach.point) <- ~x+y
 
-############################################################
-# Breach by point
-#create point
-plot(DEM)
-point.breach <- click()
-point.breach<-data.frame(point.breach)
-coordinates(point.breach) <- ~x+y
-
-#create buffer
-breach.width = 500
-buffer.point<-buffer(point.breach, width =breach.width)
+# Create spatial breach point buffer
+breach.area<-buffer(breach.point, width =breach.width)
+plot(breach.area, add=T)
 
 # extract values and select height of breach
-breachRast <- mask(DEM, buffer.point)
-breach.height <- setValues(breachRast, 1)#create empty raster
-breach.height[is.na(breachRast)] <- NA #set NA values
+breach.mask <- mask(DEM, breach.area)
+breach.rast <- setValues(breach.mask, breach.height)#create empty raster
+breach.rast[is.na(breach.mask)] <- NA #set NA values
 
 # combine DEM & breach
-DEMwithbreach<-mosaic(DEM,breach.height,fun=min)
+DEMwithbreach <- mosaic(DEM, breach.rast,fun=min)
 DEMwithbreach.filled <- fill.up(DEMwithbreach, waterheight)
 
 # Clump flooded areas
-clumps.flood<-clump(DEMwithbreach.filled)
-clumps.floodEMP <- setValues(raster(clumps.flood), 1)#create empty raster
-clumps.floodEMP[is.na(clumps.flood)] <- NA #set NA values
-clumps.flood<-clump(clumps.floodEMP) #clump connected flooded area's
+clump.flood<-clump(DEMwithbreach.filled)
+clump.floodEMP <- setValues(raster(clump.flood), 1)#create empty raster
+clump.floodEMP[is.na(clump.flood)] <- NA #set NA values
+clump.flood<-clump(clump.floodEMP) #clump connected flooded area's
 
-# Select clumps connected to breach
-clump.intersect<-intersect(clumps.flood, breach.height)
-clumps.breach<-unique(clump.intersect@data@values)
-clumps.flood[clumps.flood!=breach.height]<-NA
+# Select clump connected to breach
+clump.intersect<-intersect(clump.flood, breach.area)
+clump.connect<-unique(clump.intersect@data@values)
+flooded.area<-clump.connect[!is.na(clump.connect)]
+clump.flood[clump.flood!=flooded.area]<-NA
 
-# Set values in connected clump
-flood.values <- mask(DEMwithbreach.filled, clumps.flood)
-spplot (flood.values,col.regions = colorPal, main='Waterheight [m]')
+# Set waterheight
+water.dept <- mask(DEMwithbreach.filled, clump.flood)
+spplot (water.dept, col.regions = Watercol, 
+        main='Flooded Area', sub='Waterheigth [m]', 
+        xlab='Longitude',ylab='Latitude', scales = list(draw = TRUE),
+        sp.layout=list(list("sp.polygons", breach.area, col='red',
+                            fill='red',first=FALSE))
+        )
+
