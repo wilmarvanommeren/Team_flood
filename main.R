@@ -23,7 +23,7 @@ breach.width = 150
 breach.height = 0
 
 # Plot colorPallettes
-Watercol <- colorRampPalette(brewer.pal(9, "Blues"))(20) 
+Watercol <- rev(colorRampPalette(brewer.pal(9, "RdYlGn"))(20))
 
 # Create spatial breach point
 breach.point<-data.frame(breach.point)
@@ -47,7 +47,7 @@ clump.flood<-clump(DEMwithbreach.filled)
 clump.floodEMP <- setValues(raster(clump.flood), 1)#create empty raster
 clump.floodEMP[is.na(clump.flood)] <- NA #set NA values
 clump.flood<-clump(clump.floodEMP) #clump connected flooded area's
-
+plot(clump.floodEMP)
 # Select clump connected to breach
 clump.intersect<-intersect(clump.flood, breach.area)
 clump.connect<-unique(clump.intersect@data@values)
@@ -59,7 +59,6 @@ water.dept <- mask(DEMwithbreach.filled, clump.flood)
 spplot (water.dept, col.regions = Watercol, 
         main='Flooded Area', sub='Waterheigth [m]', 
         xlab='Longitude',ylab='Latitude', scales = list(draw = TRUE),
-        sp.layout=list(list("sp.polygons", breach.area, col='red',
-                            fill='red',first=FALSE))
+        sp.layout=list(list("sp.polygons", breach.area, col='red',fill='red',first=FALSE),
+                       list("sp.text", c(breach.point$x, breach.point$y), "Breach" , font=4))
         )
-
