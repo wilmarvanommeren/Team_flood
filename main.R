@@ -10,55 +10,30 @@ library(rgeos)
 
 # Load source scripts
 source('./r/fill.up.R')
-source('./r/create.breach.R')
+source('./r/calculate.breach.area.R')
+source('./r/calculate.flooded.area.R')
 
 # Load data
 DEM <- raster("data/AHN 5m/ahn2_5_65az1.tif")
-plot(DEM)
 
 # Project parameter(s)
-waterheight <- 2#meter
+waterheight <- 2   #meter
+plot(DEM)          #needed for the click
 breach.point <- click()
 breach.width = 150
 breach.height = 0
 
-# Plot colorPallettes
-Watercol <- rev(colorRampPalette(brewer.pal(9, "RdYlGn"))(20))
+# Calculate breach area
+breach.area<-calculate.breach.area(breach.point, breach.width)
 
-# Create spatial breach point
-breach.point<-data.frame(breach.point)
-coordinates(breach.point) <- ~x+y
+# Calculate flooded area
+flooded.area <- calculate.flooded.area(breach.area, breach.height, DEM)
 
-# Create spatial breach point buffer
-breach.area<-buffer(breach.point, width =breach.width)
-plot(breach.area, add=T)
-
-# extract values and select height of breach
-breach.mask <- mask(DEM, breach.area)
-breach.rast <- setValues(breach.mask, breach.height)#create empty raster
-breach.rast[is.na(breach.mask)] <- NA #set NA values
-
-# combine DEM & breach
-DEMwithbreach <- mosaic(DEM, breach.rast,fun=min)
-DEMwithbreach.filled <- fill.up(DEMwithbreach, waterheight)
-
-# Clump flooded areas
-clump.flood<-clump(DEMwithbreach.filled)
-clump.floodEMP <- setValues(raster(clump.flood), 1)#create empty raster
-clump.floodEMP[is.na(clump.flood)] <- NA #set NA values
-clump.flood<-clump(clump.floodEMP) #clump connected flooded area's
-plot(clump.floodEMP)
-# Select clump connected to breach
-clump.intersect<-intersect(clump.flood, breach.area)
-clump.connect<-unique(clump.intersect@data@values)
-flooded.area<-clump.connect[!is.na(clump.connect)]
-clump.flood[clump.flood!=flooded.area]<-NA
-
-# Set waterheight
-water.dept <- mask(DEMwithbreach.filled, clump.flood)
-spplot (water.dept, col.regions = Watercol, 
+# Plot flooded area
+Pallette <- rev(colorRampPalette(brewer.pal(9, "RdYlGn"))(20))
+spplot (flooded.area, col.regions = Pallette, 
         main='Flooded Area', sub='Waterheigth [m]', 
         xlab='Longitude',ylab='Latitude', scales = list(draw = TRUE),
         sp.layout=list(list("sp.polygons", breach.area, col='red',fill='red',first=FALSE),
-                       list("sp.text", c(breach.point$x, breach.point$y), "Breach" , font=4))
+                       list("sp.text", c(breach.point[1], breach.point[2]), "Breach" , font=4))
         )
