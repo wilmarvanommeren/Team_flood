@@ -45,3 +45,39 @@ clumps.flood[clumps.flood!=clumps.breach]<-NA
 # Set values in connected clump
 flood.values <- mask(DEMwithbreach.filled, clumps.flood)
 spplot (flood.values,col.regions = colorPal, main='Waterheight [m]')
+
+############################################################
+# Breach by point
+#create point
+plot(DEM)
+point.breach <- click()
+point.breach<-data.frame(point.breach)
+coordinates(point.breach) <- ~x+y
+
+#create buffer
+breach.width = 500
+buffer.point<-buffer(point.breach, width =breach.width)
+
+# extract values and select height of breach
+breachRast <- mask(DEM, buffer.point)
+breach.height <- setValues(breachRast, 1)#create empty raster
+breach.height[is.na(breachRast)] <- NA #set NA values
+
+# combine DEM & breach
+DEMwithbreach<-mosaic(DEM,breach.height,fun=min)
+DEMwithbreach.filled <- fill.up(DEMwithbreach, waterheight)
+
+# Clump flooded areas
+clumps.flood<-clump(DEMwithbreach.filled)
+clumps.floodEMP <- setValues(raster(clumps.flood), 1)#create empty raster
+clumps.floodEMP[is.na(clumps.flood)] <- NA #set NA values
+clumps.flood<-clump(clumps.floodEMP) #clump connected flooded area's
+
+# Select clumps connected to breach
+clump.intersect<-intersect(clumps.flood, breach.height)
+clumps.breach<-unique(clump.intersect@data@values)
+clumps.flood[clumps.flood!=breach.height]<-NA
+
+# Set values in connected clump
+flood.values <- mask(DEMwithbreach.filled, clumps.flood)
+spplot (flood.values,col.regions = colorPal, main='Waterheight [m]')
