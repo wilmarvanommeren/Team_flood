@@ -20,7 +20,7 @@ DEM.filled <- fill.up(DEM, waterheight)
 
 # Plot flooded areas
 colorPal <- colorRampPalette(brewer.pal(9, "Blues"))(20) # Create color palette
-spplot (DEM.filled,col.regions = colorPal, main='Waterheight [m]')
+# spplot (DEM.filled,col.regions = colorPal, main='Waterheight [m]')
 
 # Filled up DEM, single breach
 plot(DEM)
@@ -29,7 +29,7 @@ breachRast <- crop(DEM,breach)
 breachRast <- create.breach(breachRast)
 DEMwithbreach<-mosaic(DEM,breachRast,fun=min)
 DEMwithbreach.filled <- fill.up(DEMwithbreach, waterheight)
-spplot (DEMwithbreach.filled,col.regions = colorPal, main='Waterheight [m]')
+# spplot (DEMwithbreach.filled,col.regions = colorPal, main='Waterheight [m]')
 
 # Clump flooded areas
 clumps.flood<-clump(DEMwithbreach.filled)
@@ -41,5 +41,7 @@ clumps.flood<-clump(clumps.floodEMP) #clump connected flooded area's
 clump.intersect<-intersect(clumps.flood, breach)
 clumps.breach<-unique(clump.intersect@data@values)
 clumps.flood[clumps.flood!=clumps.breach]<-NA
-plot(clumps.flood)
 
+# Set values in connected clump
+flood.values <- mask(DEMwithbreach.filled, clumps.flood)
+spplot (flood.values,col.regions = colorPal, main='Waterheight [m]')
