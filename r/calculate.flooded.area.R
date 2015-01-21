@@ -10,9 +10,7 @@ calculate.flooded.area <- function(breach.area, breach.height, DEM){
   breach.rast[is.na(breach.mask)] <- NA #set NA values for everything that is NA in the mask
   
   # combine DEM & breach
-  options(warn=-1) #disable warnings to avoid breaking out of the function (warning is about taking the minimum of an NA value and an integer)
-  DEMwithbreach <- mosaic(DEM, breach.rast,fun=min)
-  options(warn=0) #enable warnings
+  DEMwithbreach <- merge(breach.rast, DEM)
   DEMwithbreach.filled <- fill.up(DEMwithbreach, waterheight)
   
   # Clump flooded areas

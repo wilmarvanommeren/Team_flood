@@ -19,10 +19,12 @@ DEM <- raster("data/AHN 5m/ahn2_5_65az1.tif")
 # Project parameter(s)
 waterheight <- 2   #meter
 plot(DEM)          #needed for the click
-breach.point <- click()
+no.of.breaches = 1
+breach.point <- click(n=no.of.breaches)
 breach.width = 150
 breach.height = 0
 
+breach.point
 # Calculate breach area
 breach.area<-calculate.breach.area(breach.point, breach.width)
 
@@ -32,7 +34,7 @@ flooded.area <- calculate.flooded.area(breach.area, breach.height, DEM)
 # Plot flooded area
 Pallette <- rev(colorRampPalette(brewer.pal(9, "RdYlGn"))(20))
 spplot (flooded.area, col.regions = Pallette, 
-        main='Flooded Area', sub='Waterheigth [m]', 
+        main='Flooded Area', sub='Waterheight [m]', 
         xlab='Longitude',ylab='Latitude', scales = list(draw = TRUE),
         sp.layout=list(list("sp.polygons", breach.area, col='red',fill='red',first=FALSE),
                        list("sp.text", c(breach.point[1], breach.point[2]), "Breach" , font=4))
