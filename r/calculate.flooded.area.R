@@ -13,17 +13,12 @@ calculate.flooded.area <- function(breach.area, breach.height, DEM){
   DEMwithbreach <- merge(breach.rast, DEM)
   DEMwithbreach.filled <- fill.up(DEMwithbreach, waterheight)
   
-  # Clump flooded areas
+  # Clump flooded areas select clumps connected to breach
   clump.flood<-clump(DEMwithbreach.filled)
-  clump.floodEMP <- setValues(raster(clump.flood), 1)#create empty raster
-  clump.floodEMP[is.na(clump.flood)] <- NA #set NA values for everything that is NA in the clump
-  clump.flood<-clump(clump.floodEMP) #clump flooded area's
-  
-  # Select clump connected to breach
-  clump.intersect<-intersect(clump.flood, breach.area) #with this intersect all clumps within the breach area can be selected
-  clump.connect<-unique(clump.intersect@data@values) #extract the unique codes of the clumps within the breach area
-  flooded.area<-clump.connect[!is.na(clump.connect)] #remove NA values
-  clump.flood[clump.flood!=flooded.area]<-NA #everything in the clumped flood areas that doesn't have the unique codes is NA
+  clump.value<-extract (clump.flood, breach.area) #extract clumps inside breaches
+  clump.connect<-unique(unlist(clump.value)) #extract values of those clumps
+  flooded.clump<-clump.connect[!is.na(clump.connect)] #remove NA values 
+  clump.flood[clump.flood!=flooded.clump]<-NA #everything in the clumped flood areas that doesn't have the unique codes is NA
   
   # Set waterheight in flooded areas
   water.dept <- mask(DEMwithbreach.filled, clump.flood)
