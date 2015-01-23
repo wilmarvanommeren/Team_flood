@@ -1,0 +1,13 @@
+Projection    STEREOGRAPHIC
+Datum         AI_AMERS
+Spheroid      BESSEL
+Units         METERS
+Zunits        NO
+Xshift        155000.0
+Yshift        463000.0
+Parameters    
+ 2 /* Projection type < 1 | 2 >
+   5 23 15.5 /* Longitude of central meridian
+  52  9 22.178 /* Latitude of projection's center
+ EQUATORIAL /* View <EQUATORIAL | NORTHPOLE | SOUTHPOLE>
+0.9999079 /* Scale factor
