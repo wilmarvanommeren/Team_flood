@@ -8,6 +8,7 @@ calculate.breach.area <- function(breach.point, breach.width){
   coordinates(breach.point) <- ~x+y
   
   # Create spatial breach point buffer
-  breach.area<-buffer(breach.point, width =breach.width)
+  breach.area<-buffer(breach.point, width = breach.width)
+  
   return(breach.area)
 }

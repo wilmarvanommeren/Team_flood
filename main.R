@@ -24,7 +24,6 @@ breach.point <- click(n=no.of.breaches)
 breach.width = 150
 breach.height = 0
 
-breach.point
 # Calculate breach area
 breach.area<-calculate.breach.area(breach.point, breach.width)
 
@@ -35,6 +34,5 @@ flooded.area <- calculate.flooded.area(breach.area, breach.height, DEM)
 Pallette <- rev(colorRampPalette(brewer.pal(9, "RdYlGn"))(20))
 spplot (flooded.area, col.regions = Pallette, 
         main='Flooded Area', sub='Waterheight [m]', 
-        xlab='Longitude',ylab='Latitude', scales = list(draw = TRUE),
-        sp.layout=list(list("sp.polygons", breach.area, col='red',fill='red',first=FALSE))
+        xlab='Longitude',ylab='Latitude', scales = list(draw = TRUE)
         )

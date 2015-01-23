@@ -3,13 +3,9 @@ calculate.flooded.area <- function(breach.area, breach.height, DEM){
   # breach.area: The area of the breach
   # breach.height: The height of the bottom of the breach
   # DEM: The Digital Elevation Model of the area
-  
-  # extract values and select height of breach
-  breach.mask <- mask(DEM, breach.area)
-  breach.rast <- setValues(breach.mask, breach.height)#create empty raster
-  breach.rast[is.na(breach.mask)] <- NA #set NA values for everything that is NA in the mask
-  
-  # combine DEM & breach
+ 
+  breach.rast <- rasterize(breach.area, DEM)
+  # fill DEMwithbreach.
   DEMwithbreach <- merge(breach.rast, DEM)
   DEMwithbreach.filled <- fill.up(DEMwithbreach, waterheight)
   
@@ -25,16 +21,3 @@ calculate.flooded.area <- function(breach.area, breach.height, DEM){
   
   return(water.dept)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
