@@ -1,13 +1,14 @@
-calculate.flooded.area <- function(breach.area, breach.height, DEM){
+calculate.flooded.area <- function(breach.area, breach.height, water.height, DEM){
   # Function to calculate the flooded area's
   # breach.area: The area of the breach
   # breach.height: The height of the bottom of the breach
   # DEM: The Digital Elevation Model of the area
- 
-  breach.rast <- rasterize(breach.area, DEM)
+  
+  breach.rast <- rasterize(breach.area, DEM, field=breach.height)
+  
   # fill DEMwithbreach.
   DEMwithbreach <- merge(breach.rast, DEM)
-  DEMwithbreach.filled <- fill.up(DEMwithbreach, waterheight)
+  DEMwithbreach.filled <- fill.up(DEMwithbreach, water.height)
   
   # Clump flooded areas select clumps connected to breach
   clump.flood<-clump(DEMwithbreach.filled)
