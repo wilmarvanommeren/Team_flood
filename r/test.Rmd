@@ -1,0 +1,76 @@
+---
+title: "Flood Risk Area's"
+author: "Rob Maas & Wilmar van Ommeren"
+date: "Friday, January 23, 2015"
+output: html_document
+runtime: shiny
+---
+```{r library & source, echo=FALSE, results='hide', message=FALSE}
+# Load libraries
+library(shiny)
+library(sp)
+library(raster)
+library(RColorBrewer)
+library(igraph)
+library(rgeos)
+library(rasterVis)
+
+# Load source scripts
+source('fill.up.R')
+source('calculate.breach.area.R')
+source('calculate.flooded.area.R')
+```
+
+```{r input, echo=FALSE}
+#All interactive input variables
+inputPanel( 
+  fileInput('DEM',label='Input DEM'), #upload file
+  numericInput("breach.width", label= "Breach width", 
+              min=0,max=1000,value=200),#set breach width
+  sliderInput("water.height", label= "Water height",
+              min=1,max=20,value=1),#set water height
+  numericInput("coord.x", label= "X coordinate", 
+              value=46015.33),#x.coordinate
+  numericInput("coord.y", label= "Y coordinate", 
+              value=418028),#y.coordinate
+  sliderInput("time.hour", label= "Time in hours",
+              min=1,max=24,value=1))#set time
+```
+
+```{r plot, echo=FALSE}
+#Create plot from the inputvariables
+renderPlot({ 
+    #Get variables for functions
+    if (is.null(input$DEM)){
+      return(NULL)} #return NULL with no input data
+    DEM <- input$DEM #select input data.frame
+    DEM<-raster(DEM$datapath) #load input datafile
+    breach.width<-as.numeric(input$breach.width)
+    water.height<-as.numeric(input$water.height)
+    breach.height<-0 #set to 0 for this moment
+    breach.point<-matrix(c(input$coord.x, input$coord.y), nrow=1, ncol=2)
+    dimnames(breach.point)<-list(colnames(breach.point), c('x','y'))
+    
+    # Calculate breach area
+    breach.area<-calculate.breach.area(breach.point, breach.width)
+    
+    # Calculate flooded area
+    flooded.area <- calculate.flooded.area(breach.area, breach.height, water.height, DEM)
+    
+    # ColorPallettes
+    WATERPallette <- colorRampPalette(brewer.pal(9, "Blues"))(20)
+    DEMPallette<-colorRampPalette(c("darkseagreen","darkgreen","darkolivegreen","darkkhaki","darkgoldenrod"))(20)
+    
+    #plot function (adds a layer of the DEM under the result)
+    spplot (flooded.area, col.regions = WATERPallette, 
+            main='Flooded Area', sub='Waterheight [m]',
+            xlab='Longitude',ylab='Latitude', 
+            scales = list(draw = TRUE), 
+            sp.layout=list(list('sp.polygons', breach.area, 
+                                col='red', fill='red', first=FALSE)))+
+    as.layer(spplot(DEM, col.regions=DEMPallette), under=T)
+    })
+```
+
+
+DEM files are available [here](http://www.arcgis.com/home/webmap/viewer.html?webmap=ac6b6ecd42424e33bd0e6fa09499c563).
