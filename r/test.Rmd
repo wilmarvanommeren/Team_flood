@@ -34,7 +34,9 @@ inputPanel(
   numericInput("coord.y", label= "Y coordinate", 
               value=418028),#y.coordinate
   sliderInput("time.hour", label= "Time in hours",
-              min=1,max=24,value=1))#set time
+              min=1,max=24,value=1),#set time
+  actionButton("goButton","Go!"))
+
 ```
 
 ```{r plot, echo=FALSE}
@@ -45,10 +47,12 @@ renderPlot({
       return(NULL)} #return NULL with no input data
     DEM <- input$DEM #select input data.frame
     DEM<-raster(DEM$datapath) #load input datafile
-    breach.width<-as.numeric(input$breach.width)
-    water.height<-as.numeric(input$water.height)
+    
+    input$goButton
+    breach.width<- isolate(as.numeric(input$breach.width))
+    water.height<-isolate(as.numeric(input$water.height))
     breach.height<-0 #set to 0 for this moment
-    breach.point<-matrix(c(input$coord.x, input$coord.y), nrow=1, ncol=2)
+    breach.point<-isolate(matrix(c(input$coord.x, input$coord.y), nrow=1, ncol=2))
     dimnames(breach.point)<-list(colnames(breach.point), c('x','y'))
     
     # Calculate breach area
