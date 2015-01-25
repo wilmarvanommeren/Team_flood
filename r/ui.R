@@ -8,20 +8,21 @@ shinyUI(#All interactive input variables
       sidebarPanel( 
         fileInput('DEM',label='Input DEM', accept=c('.tif')), #upload file
         p('Example DEM-files are available', a('here', href='http://www.arcgis.com/home/webmap/viewer.html?webmap=ac6b6ecd42424e33bd0e6fa09499c563', target="_blank")),# add URL
-        numericInput("breach.width", label= "Breach width", 
-                     min=0,max=1000,value=200),#set breach width
         sliderInput("water.height", label= "Water height",
-                    min=1,max=20,value=1, step=0.1),#set water height
+                    min=0.1,max=20,value=0.1, step=0.1),#set water height
+        sliderInput("time.hour", label= "Time in hours",
+                    min=1,max=24,value=1),#set time
+        h4('Breach Settings:'),
+        numericInput("breach.width", label= "Width", 
+                     min=0,max=1000,value=200),#set breach width        
         numericInput("coord.x", label= "X coordinate", 
                      value=46015.33),#x.coordinate
         numericInput("coord.y", label= "Y coordinate", 
                      value=418028),#y.coordinate
-        sliderInput("time.hour", label= "Time in hours",
-                    min=1,max=24,value=1),#set time
         actionButton("goButton","Go!")),
       mainPanel(
-        plotOutput("plot", clickId="click"),
-        tableOutput("coord")),
+        plotOutput("plot", clickId="click")
+        ),
       fluid=T
     )
   )

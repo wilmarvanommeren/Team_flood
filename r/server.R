@@ -10,7 +10,7 @@ library(igraph)
 library(rgeos)
 library(rasterVis)
 
-
+options(shiny.maxRequestSize = 30*1024^2)#set file upload
 # Load source scripts
 source("G:/Mijn documenten/Wageningen/Geoscripting/Team_flood/r/fill.up.R")
 source("G:/Mijn documenten/Wageningen/Geoscripting/Team_flood/r/calculate.breach.area.R")
