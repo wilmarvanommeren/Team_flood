@@ -9,8 +9,8 @@ library(RColorBrewer)
 library(igraph)
 library(rgeos)
 library(rasterVis)
-library(proj4)
 library(rgdal)
+library(proj4)
 
 # Load source scripts
 source("./r/fill.up.R")
@@ -25,7 +25,8 @@ shinyServer(function(input, output){#Create plot from the inputvariables
     RB1 <- as.integer(input$RB1) 
     #load input datafile
     if (RB1==0){
-        DEM<- getData('alt', country=input$country, mask=F)
+      validate(need(input$country !="...", "Choose a country or upload a file. \nIf a country is choosen the data will be downloaded to your harddisk!\nScroll down for help."))
+      DEM<- getData('alt', country=input$country, mask=F)
         
     }             
     else if (is.null(input$DEM)){
@@ -33,12 +34,12 @@ shinyServer(function(input, output){#Create plot from the inputvariables
      }
     else if (RB1==1){
        DEM<-raster(input$DEM$datapath)}
-
+    
     #transform DEM if necessary
-    proj<-"+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.417,50.3319,465.552,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs"
-    if (projection(DEM)!=proj){
-      DEM<-projectRaster(b, crs=CRS(proj))}
-
+     proj<-"+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.417,50.3319,465.552,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs"
+     if (projection(DEM)!=proj){
+       DEM<-projectRaster(DEM, crs=CRS(proj))}
+      
     ## Get other variables and isolate them so that the function only is executed if the button is clicked
     input$goButton
     breach.width<- isolate(as.numeric(input$breach.width))
@@ -62,7 +63,9 @@ shinyServer(function(input, output){#Create plot from the inputvariables
     breach.area<-calculate.breach.area(breach.point, breach.width)
    
     # Calculate flooded area
-    flooded.area<- isolate(calculate.flooded.area(breach.area, breach.height, water.height, DEM))
+    flooded.area<-NULL
+    withProgress(expr=try(flooded.area<- isolate(calculate.flooded.area(breach.area, breach.height, water.height, DEM)))
+                 , message = 'Calculation in progress',detail = 'This may take a while...')
 
     # ColorPallettes
     WATERPallette <- colorRampPalette(brewer.pal(9, "Blues"))(20)
@@ -71,13 +74,17 @@ shinyServer(function(input, output){#Create plot from the inputvariables
     ## Plot if the button is clicked for the first time
     if (input$goButton==0){
       return(NULL)}
-    else{
+    else if (is.null(flooded.area)){
+      spplot(DEM, col.regions=DEMPallette, main='Digital Elevation Map [m]', sub="No flooded area's!",
+             xlab='Longitude',ylab='Latitude', 
+             scales = list(draw = TRUE))} 
+    else {
       spplot (flooded.area, col.regions = WATERPallette, 
               main='Flooded Area', sub='Waterheight [m]',
               xlab='Longitude',ylab='Latitude', 
               scales = list(draw = TRUE), 
               sp.layout=list(list('sp.polygons', breach.area, 
                                   col='red', fill='red', first=FALSE)))+
-        as.layer(spplot(DEM, col.regions=DEMPallette), under=T)}
-   })
+        as.layer(spplot(DEM, col.regions=DEMPallette), under=T)}        
+  })
 })
