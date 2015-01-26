@@ -1,11 +1,20 @@
 # Authors: Rob Maas & Wilmar van Ommeren
 # Date: January 2015
 
+# Install packages if required
+if (!require(shiny)){install.packages("shiny")}
+if (!require(sp)){install.packages("sp")}
+if (!require(raster)){install.packages("raster")}
+if (!require(rasterVis)){install.packages("rasterVis")}
+if (!require(RColorBrewer)){install.packages("RColorBrewer")}
+if (!require(proj4)){install.packages("proj4")}
+if (!require(rgeos)){install.packages("rgeos")}
+if (!require(rgdal)){install.packages("rgdal")}
+
 # Load libraries
 library(sp)
 library(raster)
 library(RColorBrewer)
-library(igraph)
 library(rgeos)
 library(rasterVis)
 

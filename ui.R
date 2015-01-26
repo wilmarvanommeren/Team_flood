@@ -1,3 +1,11 @@
+# Authors: Rob Maas & Wilmar van Ommeren
+# Date: January 2015
+
+# Install packages if required
+if (!require(shiny)){install.packages("shiny")}
+if (!require(raster)){install.packages("raster")}
+
+# Load libraries
 library(shiny)
 library(raster)
 
@@ -12,31 +20,31 @@ allcountry<-alldata[,2]
 names(allcodes)<-allcountry
 allcodes<-append(empty, allcodes)
 
-# Define UI for application that draws a histogram
-shinyUI(#All interactive input variables
+## Define UI for application that draws a histogram
+shinyUI(# All interactive input variables
   fluidPage(
     titlePanel(title="The flooded area's after a single or multiple breach(es)",windowTitle="Flood Risk Area's"),
     sidebarLayout(
       sidebarPanel( 
         radioButtons('RB1', 'DEM options', c('Use country'=0, 'Upload region'=1), inline=T),
         selectInput("country", label="Select country", choices=allcodes),
-        fileInput('DEM',label='Upload region', accept=c('.tif','.grd')), #upload file
+        fileInput('DEM',label='Upload region', accept=c('.tif','.grd')), 
         sliderInput("water.height", label= "Water height",
                     min=0.1,max=20,value=0.1, step=0.1),  
         numericInput("breach.width", label= "Breach width", 
-                     min=0,max=1000,value=0),#set breach width        
+                     min=0,max=1000,value=0),        
         radioButtons('RB2', 'Number of breaches', c('single'=0, 'multiple'=1), inline=T),
         h4("Single breach"),
         numericInput("coord.x", label= "X coordinate", 
-                     value=46015),#x.coordinate
+                     value=46015),
         numericInput("coord.y", label= "Y coordinate", 
-                     value=418028),#y.coordinate
+                     value=418028),
         h4("Multiple breaches"),
         fileInput('coords',label='Upload coordinates', accept=c('.csv')),
         actionButton("goButton","Go!")),
-      mainPanel(
+      mainPanel(# Plotoutput
         plotOutput("plot", clickId="click", height="750px"),
-        br(),
+        br(),# Help
         br(),
         br(),
         br(),
