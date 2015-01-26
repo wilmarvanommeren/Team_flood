@@ -2,8 +2,8 @@
 # Date: January 2015
 
 # Install packages if required
-if (!require(shiny)){install.packages("shiny")}
 if (!require(sp)){install.packages("sp")}
+if (!require(igraph)){install.packages("igraph")}
 if (!require(raster)){install.packages("raster")}
 if (!require(rasterVis)){install.packages("rasterVis")}
 if (!require(RColorBrewer)){install.packages("RColorBrewer")}
@@ -13,10 +13,13 @@ if (!require(rgdal)){install.packages("rgdal")}
 
 # Load libraries
 library(sp)
+library(igraph)
 library(raster)
-library(RColorBrewer)
-library(rgeos)
 library(rasterVis)
+library(RColorBrewer)
+library(proj4)
+library(rgeos)
+library(rgdal)
 
 # Load source scripts
 source('./r/fill.up.R')

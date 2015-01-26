@@ -4,6 +4,7 @@
 # Install packages if required
 if (!require(shiny)){install.packages("shiny")}
 if (!require(sp)){install.packages("sp")}
+if (!require(igraph)){install.packages("igraph")}
 if (!require(raster)){install.packages("raster")}
 if (!require(rasterVis)){install.packages("rasterVis")}
 if (!require(RColorBrewer)){install.packages("RColorBrewer")}
@@ -14,6 +15,7 @@ if (!require(rgdal)){install.packages("rgdal")}
 # Load libraries
 library(shiny)
 library(sp)
+library(igraph)
 library(raster)
 library(rasterVis)
 library(RColorBrewer)
