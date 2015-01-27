@@ -1,7 +1,7 @@
 # Authors: Rob Maas & Wilmar van Ommeren
 # Date: January 2015
 
-# Install packages if required
+# Load & install packages if required
 if (!require(sp)){install.packages("sp")}
 if (!require(igraph)){install.packages("igraph")}
 if (!require(raster)){install.packages("raster")}
@@ -10,16 +10,6 @@ if (!require(RColorBrewer)){install.packages("RColorBrewer")}
 if (!require(proj4)){install.packages("proj4")}
 if (!require(rgeos)){install.packages("rgeos")}
 if (!require(rgdal)){install.packages("rgdal")}
-
-# Load libraries
-library(sp)
-library(igraph)
-library(raster)
-library(rasterVis)
-library(RColorBrewer)
-library(proj4)
-library(rgeos)
-library(rgdal)
 
 # Load source scripts
 source('./r/fill.up.R')
