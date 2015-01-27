@@ -7,7 +7,7 @@ calculate.flooded.area <- function(breach.area, water.height, DEM, DEM.withbreac
   DEMwithbreach.filled <- fill.up(DEM.withbreach, water.height)
   
   # Clump flooded areas select clumps connected to breach
-  clump.flood<-clump(DEMwithbreach.filled)
+  clump.flood<-clump(DEMwithbreach.filled, directions=4)
   clump.value<-extract (clump.flood, breach.area) #extract clumps inside breaches
   clump.connect<-unique(unlist(clump.value)) #extract values of those clumps
   flooded.clump<-clump.connect[!is.na(clump.connect)] #remove NA values 
@@ -18,3 +18,4 @@ calculate.flooded.area <- function(breach.area, water.height, DEM, DEM.withbreac
   
   return(water.dept)
 }
+?clump
