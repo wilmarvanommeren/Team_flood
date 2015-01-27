@@ -1,13 +1,9 @@
 # Authors: Rob Maas & Wilmar van Ommeren
 # Date: January 2015
 
-# Install packages if required
+# Load & install packages if required
 if (!require(shiny)){install.packages("shiny")}
 if (!require(raster)){install.packages("raster")}
-
-# Load libraries
-library(shiny)
-library(raster)
 
 #Set max upload size
 options(shiny.maxRequestSize = 30*1024^2)
@@ -70,6 +66,7 @@ shinyUI(# All interactive input variables
         p("A DEM will be plotted if there is no flooded area present or if value's are not filled in correctly (e.g: 0 breach width, wrong coordinate units, wrong file extension"),
         h5("2.2 Error"),
         p("An error will be returned if there is not enough space available in the memory of the computer for the computation. This can be avoided by uploading or selecting a smaller file."),
+        p("If 'Multiple' breaches is selected and the file format or extension is wrong an error will be returned. Remember that the extension should be .csv and the file should contain two columns with x and y coordinates. The names of the columns should be respectively 'x' and 'y'."),
         h5("2.3 Plot"),
         p("A White screen means the calculation is in progress, so there is no result yet. If the plot appears transparant this probably means you moved or resized the window of the browser. Somehow the calculation will start again.")
         ),
