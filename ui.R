@@ -16,36 +16,48 @@ allcountry<-alldata[,2]
 names(allcodes)<-allcountry
 allcodes<-append(empty, allcodes)
 
-## Define UI for application that draws a histogram
-shinyUI(# All interactive input variables
+# Define UI for application that calculates and plots the flooded area
+shinyUI(
   fluidPage(
+    # Title
     titlePanel(title="The flooded area's after a single or multiple breach(es)",windowTitle="Flood Risk Area's"),
+    # Sidebar
     sidebarLayout(
       sidebarPanel( 
+        # Every panel in the sidebar (h4 = heading 4, hr = horizontal line, p = paragraph)
         h4("Global Parameters"),
+        # Upload a DEM or download a DEM
         radioButtons('RB1', 'Choose method', c('Use country'=0, 'Upload region'=1), inline=T),
         selectInput("country", label="Select country", choices=allcodes),
         fileInput('DEM',label='Upload region (.tif, .grd)', accept=c('.tif','.grd')), 
+        # Input values for waterlevel and breach width
         numericInput("water.height", label= "Water level [m]",min=0, value=0),  
         numericInput("breach.width", label= "Breach width [m]", min=0,max=1000,value=0),        
+        # A single breach or multiple breaches
         radioButtons('RB2', 'Number of breaches', c('Single'=0, 'Multiple'=1), inline=T),
         hr(style="border-color:gray;"),
+        # Enter coordinates for single breach
         h4("Single breach"),
         numericInput("coord.x", label= "X coordinate [m]", value=46015),
         numericInput("coord.y", label= "Y coordinate [m]", value=418028),
         p("Convert WGS84 to RD coordinates", a("here", href='http://www.regiolab-delft.nl/?q=node/36', target="_blank")),
         hr(style="border-color:gray;;"),
+        # Upload coordinates for multiple breaches
         h4("Multiple breaches"),
         fileInput('coords',label='Upload coordinates (.csv)', accept=c('.csv')),
-        actionButton("goButton","Go!"),
+        # Press go to plot the output (calculations have already started)
+        actionButton("goButton","Plot!"),
         br(),
         br(),
         br(),
         hr(style="border-color:gray;"),
+        # Remove downloaded DEM's
         p("Removes downloaded country DEM files"),
         actionButton("remove", "Remove")),     
-      mainPanel(# Plotoutput
+      mainPanel(
+        # Plot & textoutput
         plotOutput("plot", height='750px'),
+        textOutput("total"),
         textOutput("removed"),
         br(),# Help
         br(),
@@ -59,10 +71,8 @@ shinyUI(# All interactive input variables
         br(),
         br(),
         br(),
-        br(),
-        br(),
-        br(),
         hr(style="border-color:black;"),
+        # Project background information
         p(strong("Authors:"), "Rob Maas & Wilmar van Ommeren"),
         p(strong("Instance:"), "Wageningen University, Wageningen"),
         p(strong("Course:"), "Geo Scripting", a("GRS-51806", href="https://ssc.wur.nl/Studiegids/Vak/GRS-51806", target="_blank")),
@@ -70,6 +80,7 @@ shinyUI(# All interactive input variables
         img(src='logo.png'),
         br(),
         hr(style="border-color:black;"),
+        # Project help
         h2("Help"),
         h4("1.Instructions"),
         h5('1.1 Digital Elevation Map [DEM] options'),
@@ -77,7 +88,7 @@ shinyUI(# All interactive input variables
         p("If option 'Upload region' is used, a rasterfile from your harddisk will be used in the calculation. Supported extensions are .tif and .grd. Digital elevation maps of the Netherlands are accesible"),
         p('DEMs of the Netherlands are downloadable', a('here.', href='http://www.arcgis.com/home/webmap/viewer.html?webmap=ac6b6ecd42424e33bd0e6fa09499c563', target="_blank")),
         h5("1.2 Waterheight"),
-        p("The sea level is the reference level."),
+        p("The sea level is the reference level. The minimum value of the breach is the minimum height value that is placed within the breach area. This minimum value is extracted from the DEM."),
         h5("1.3 Breach settings"),
         p("All input maps are converted to the Dutch",a('RD coordinate system.', href='http://en.wikipedia.org/wiki/Geography_of_the_Netherlands', target="_blank")),
         p("If option 'single' is selected the coordinates of the single breach should be entered in the fields below the text 'Single breach. Coordinate unit is meters, because this is the unit of the RD coordinate system."),
@@ -90,13 +101,12 @@ shinyUI(# All interactive input variables
         h5("2.1 DEM"),
         p("A DEM will be plotted if there is no flooded area present or if value's are not filled in correctly (e.g: 0 breach width, wrong coordinate units, wrong file extension)."),
         h5("2.2 Error"),
-        p("An error will be returned if there is not enough space available in the memory of the computer for the computation (see error message below). This can be avoided by uploading or selecting a smaller file. A better pc would also help."),
-        p("If 'Multiple' breaches is selected and the file format or extension is wrong, the same error will be returned. Remember that the extension should be .csv and the file should contain two columns with x and y coordinates. The names of the columns should be respectively 'x' and 'y'."),
-        img(src='error.png'),
+        p("An error will be returned if there is not enough space available in the memory of the computer for the computation (",span("Error: cannot allocate vector of size x MB", style= "color:red"),"). This can be avoided by uploading or selecting a smaller file. A better pc would also help."),
+        p("If 'Multiple' breaches is selected and the file format or extension is wrong, another error will be returned (",span("Error: object 'x' not found", style= "color:red"),"). Remember that the extension should be .csv and the file should contain two columns with x and y coordinates. The names of the columns should be respectively 'x' and 'y'."),
+  
         h5("2.3 Plot"),
         p("A White screen means the calculation is in progress, so there is no result yet. If the plot appears transparant this probably means you moved or resized the window of the browser. Somehow the calculation will start again.")
-        ),
-      fluid=T
+        )
     )
   )
 )

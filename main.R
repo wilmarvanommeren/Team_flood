@@ -51,3 +51,12 @@ spplot (flooded.area, col.regions = waterPallette,
         , sp.layout=list(list('sp.polygons', breach.area, col='red', fill='red', first=FALSE
                               )
                          , sp.raster))
+
+# Total flooded area
+resolutionX <-xres(flooded.area)
+resolutionY <-yres(flooded.area)
+frequency <- freq(flooded.area, useNA='no') 
+total.area.m2 <- sum(frequency[,2])*(resolutionX*resolutionY)
+total.area.km2 <- total.area.m2/1000000
+
+paste("The total flooded area is", format(round(total.area.km2, 2), nsmall=2), 'km2.')
