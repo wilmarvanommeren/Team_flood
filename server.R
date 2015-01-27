@@ -27,6 +27,7 @@ library(rgdal)
 source("./r/fill.up.R")
 source("./r/calculate.breach.area.R")
 source("./r/calculate.flooded.area.R")
+source('./r/merge.breach.DEM.R')
 
 # Plot flooded area with shiny
 shinyServer(function(input, output){#Create plot from the inputvariables
@@ -72,10 +73,14 @@ shinyServer(function(input, output){#Create plot from the inputvariables
     ## Calculate the outputplotdata
     # Calculate breach area
     breach.area<-calculate.breach.area(breach.point, breach.width)
-   
+    
+    # Include breach area in DEM
+    DEM.withbreach <- withProgress(expr=try(merge.breach.DEM(breach.area, DEM))
+                                            , message = '(Re-)Calculation in progress',detail = 'This may take a while...')
+    
     # Calculate flooded area
     flooded.area<-NULL
-    withProgress(expr=try(flooded.area<- isolate(calculate.flooded.area(breach.area, breach.height, water.height, DEM)))
+    flooded.area<- withProgress(expr=try(isolate(calculate.flooded.area(breach.area, water.height, DEM, DEM.withbreach)))
                  , message = '(Re-)Calculation in progress',detail = 'This may take a while...')
 
     # ColorPallettes
