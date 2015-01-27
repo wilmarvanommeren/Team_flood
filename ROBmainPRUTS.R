@@ -43,53 +43,32 @@ DEMPallette<-colorRampPalette(c("darkseagreen","darkgreen","darkolivegreen","dar
 
 
 ### INSERTING OPEN STREET MAP ###
+# Extract the corners of the extent
+topleft <- cbind(extent(flooded.area)[1], extent(flooded.area)[4])   # top left coordinate of extent
+botright <- cbind(extent(flooded.area)[2], extent(flooded.area)[3])   # bottom right coordinate of extent
 
-topleft <- c(extent(flooded.area)[1],extent(flooded.area)[4])
-botright <- c(extent(flooded.area)[2],extent(flooded.area)[3])
-extent(flooded.area)
+# Make the extent-corners spatial and give it the same projection as the flooded area.
+extentcorners <- SpatialPoints(rbind(topleft, botright))
+proj4string(extentcorners) <- crs(flooded.area)
 
-osmproj <- "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs"
+# reproject extent to geographic coordinates to wgs84 for OpenStreetMap
+extent.wgs84<- spTransform(extentcorners, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 
-tlosm <- ptransform(topleft, crs(flooded.area), osmproj)
-brosm <- ptransform(botright, crs(flooded.area), osmproj)
+# retrieve basemap
+osm <- openmap (c(bbox(extent.wgs84)[2,2], bbox(extent.wgs84)[1,1]), c(bbox(extent.wgs84)[2,1], bbox(extent.wgs84)[1,2]))
 
-map <- openmap(tlosm,brosm,type='osm')
+# reproject basemap back to flooded area projection
+osm.trans <- openproj (osm, proj4string(extentcorners))
 
-tlosm
-# flood.osmextent <- projectExtent(flooded.area, osmproj)
-# flood.osmextent@extent[2]
-# topleft <- c(flood.osmextent@extent[1],flood.osmextent@extent[3])
-# botright <- c(flood.osmextent@extent[2],flood.osmextent@extent[3])
-# map <- openmap(topleft,botright,type='osm')
-# plot(flood.osmextent)
+#plot
+plot (osm.trans)
+plot (flooded.area, add=T, col=waterPallette)
 
-?SpatialPolygons
-
- <- spTransform(extentpoly,osm())
-
-map <- openmap(c(51.73744715506255,3.6388778686523438),c(51.63847621195153,3.99078369140625),type='osm')
-
-crs(map)
-a<-map$tiles
-
-a$projection@projargs
-
-map_trans <- openproj(topleft, projection = osm())
-plot(map)
-plot(map_trans, raster=TRUE)
-plot(flooded.area,add=T,col=waterPallette)
-?openmap
-
-?projectExtent
-a<-map[3]
-str(a)
-plot(map_longlat,raster=TRUE)
-map("world",col="red",add=TRUE)
 
 ## plot flooded area
-plot(flooded.area,add=T,col=waterPallette)
-spplot (flooded.area, col.regions = waterPallette, 
-        main='Flooded Area', sub='Waterheight [m]', 
-        xlab='Longitude',ylab='Latitude', scales = list(draw = TRUE)
-        , sp.layout=list(list('sp.polygons', breach.area, col='red', first=FALSE)))+
-  as.layer(spplot(DEM, col.regions=DEMPallette), under=T)
+# plot(flooded.area,add=T,col=waterPallette)
+# spplot (flooded.area, col.regions = waterPallette, 
+#         main='Flooded Area', sub='Waterheight [m]', 
+#         xlab='Longitude',ylab='Latitude', scales = list(draw = TRUE)
+#         , sp.layout=list(list('sp.polygons', breach.area, col='red', first=FALSE)))+
+#   as.layer(spplot(DEM, col=DEMPallette under=T))
