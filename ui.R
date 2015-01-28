@@ -32,12 +32,12 @@ shinyUI(
         fileInput('DEM',label='Upload region (.tif, .grd)', accept=c('.tif','.grd')), 
         # Input values for waterlevel and breach width
         numericInput("water.height", label= "Water level [m]",min=0, value=0),  
-        numericInput("breach.width", label= "Breach width [m]", min=0,max=1000,value=0),        
         # A single breach or multiple breaches
         radioButtons('RB2', 'Number of breaches', c('Single'=0, 'Multiple'=1), inline=T),
         hr(style="border-color:gray;"),
         # Enter coordinates for single breach
         h4("Single breach"),
+        numericInput("breach.width", label= "Breach width [m]", min=0,max=1000,value=0),
         numericInput("coord.x", label= "X coordinate [m]", value=46015),
         numericInput("coord.y", label= "Y coordinate [m]", value=418028),
         p("Convert WGS84 to RD coordinates", a("here", href='http://www.regiolab-delft.nl/?q=node/36', target="_blank")),

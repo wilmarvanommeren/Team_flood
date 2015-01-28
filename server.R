@@ -59,7 +59,9 @@ shinyServer(function(input, output){
     else if (is.null(input$coords)){
       validate(need(input$coords !=NULL, "Upload a .csv file with two columns representing the 'x' and 'y' coordinates.\nThe columns should be named 'x' and 'y'.\n\nScroll down for help."))}
     else if (RB2==1){
-      breach.point<- read.csv(input$coords$datapath)}
+      multiple.breach<- read.csv(input$coords$datapath)}
+      breach.point <- subset(multiple.breach, select=1:2)
+      breach.width <- unlist(multiple.breach[3])
     
     # Calculate breach area
     breach.area<-NULL # If NULL returned the plot function will only plot the DEM

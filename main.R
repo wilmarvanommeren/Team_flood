@@ -30,6 +30,11 @@ no.of.breaches = 1
 breach.point <- click(n=no.of.breaches)
 breach.width = 220
 
+# Example multiple breach
+# multiple.breach<- read.csv("G:/Mijn documenten/Wageningen/Geoscripting/Team_flood/data/coords.csv")
+# breach.point <- subset(multiple.breach, select=1:2)
+# breach.width <- multiple.breach[3]
+
 # Calculate breach area
 breach.area<-calculate.breach.area(breach.point, breach.width)
 

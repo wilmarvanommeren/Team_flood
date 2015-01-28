@@ -8,7 +8,29 @@ calculate.breach.area <- function(breach.point, breach.width){
   coordinates(breach.point) <- ~x+y
   
   # Create spatial breach point buffer
-  breach.area<-buffer(breach.point, width = breach.width)
+  bufferlist = list() #Create empty list
+  if (length(unlist(breach.width))>1){ #if multiple breaches go in the forloop
+    for (i in (1:length(breach.width[,1]))){
+      # Lists a buffer per breach, dependent on the breach.width
+      buffer<-buffer(breach.point[i], width = multiple.breach[3][i,]) 
+      bufferlist[[i]]<-buffer}
+    
+    # Create names for all buffers in the list (which will be used as ID's)
+    set.seed(1)
+    IDs <- sample(c(LETTERS, letters), 3)
+    names(bufferlist) <- IDs
+    
+    # Create a single SpatialPolygons object from a list of SpatialPolygons
+    polygon <- SpatialPolygons(lapply(1:length(bufferlist), function(i) {
+      # Select slot 'polygons' from individual list items
+      Pol <- slot(bufferlist[[i]], "polygons")[[1]]
+      # Create IDs from the created names
+      slot(Pol, "ID") <- names(bufferlist)[i]
+      # The function SpatialPolygons will be applied on the listitems with new IDs
+      Pol}))
+  } 
+  else{ #If single breach
+    polygon<-buffer(breach.point, width = breach.width)}
   
-  return(breach.area)
+  return(polygon)
 }
