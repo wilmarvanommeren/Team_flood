@@ -73,6 +73,6 @@ total.area.km2 <- sum(frequency[,2])
 df <- data.frame(frequency) #Needed for plot
 plot.title = 'Water Depth'
 plot.subtitle = paste("Total flooded area:", format(round(total.area.km2, 2), nsmall=2),"km2")
-qplot(df$value, df$count, geom="histogram", stat="identity", xlab="Meter", ylab="Area [km2]", fill=I("darkblue"))+
+qplot(df$value, df$count, geom="histogram", stat="identity", xlab="Meter", ylab="Area [km2]", fill=I("darkblue"), alpha=100)+
   ggtitle(bquote(atop(.(plot.title), atop(italic(.(plot.subtitle)), ""))))+
-  scale_x_continuous(breaks=seq(min(df$value), max(df$value), 1))
+  scale_x_continuous(breaks=seq(min(df$value), max(df$value), 1)) + theme(legend.position='none')

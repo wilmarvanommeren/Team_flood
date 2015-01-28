@@ -62,17 +62,6 @@ shinyUI(
         textOutput("total"),
         textOutput("removed"),
         br(),# Help
-        br(),
-        br(),
-        br(),
-        br(),
-        br(),
-        br(),
-        br(),
-        br(),
-        br(),
-        br(),
-        br(),
         hr(style="border-color:black;"),
         # Project background information
         p(strong("Authors:"), "Rob Maas & Wilmar van Ommeren"),
@@ -94,7 +83,7 @@ shinyUI(
         h5("1.3 Breach settings"),
         p("All input maps are converted to the Dutch",a('RD coordinate system.', href='http://en.wikipedia.org/wiki/Geography_of_the_Netherlands', target="_blank")),
         p("If option 'single' is selected the coordinates of the single breach should be entered in the fields below the text 'Single breach. Coordinate unit is meters, because this is the unit of the RD coordinate system."),
-        p("If option 'multiple' is selected a file can be uploaded that only contains an x and y column (example image below). The supported extension is .csv."),
+        p("If option 'multiple' is selected a file can be uploaded that contains an x, y and breach width column (example image below). The supported extension is .csv."),
         img(src='CSVTableExample.png'),
         h5("1.4 Start calculation"),
         p("Press 'Go!' to start the calculation. This may take some time!"),
@@ -104,11 +93,27 @@ shinyUI(
         p("A DEM will be plotted if there is no flooded area present or if value's are not filled in correctly (e.g: 0 breach width, wrong coordinate units, wrong file extension)."),
         h5("2.2 Error"),
         p("An error will be returned if there is not enough space available in the memory of the computer for the computation (",span("Error: cannot allocate vector of size x MB", style= "color:red"),"). This can be avoided by uploading or selecting a smaller file. A better pc would also help."),
-        p("If 'Multiple' breaches is selected and the file format or extension is wrong, another error will be returned (",span("Error: object 'x' not found", style= "color:red"),"). Remember that the extension should be .csv and the file should contain two columns with x and y coordinates. The names of the columns should be respectively 'x' and 'y'."),
-  
+        p("If 'Multiple' breaches is selected and the file format or extension is wrong, another error will be returned (",span("Error: object 'x' not found", style= "color:red"),"). Remember that the extension should be .csv and the file should contain three columns with x and y coordinates and the breach width. The names of the first columns should be respectively 'x' and 'y'."),
         h5("2.3 Plot"),
-        p("A White screen means the calculation is in progress, so there is no result yet. If the plot appears transparant this probably means you moved or resized the window of the browser. Somehow the calculation will start again.")
-        )
+        p("A White screen means the calculation is in progress, so there is no result yet. If the plot appears transparant this probably means you moved or resized the window of the browser. Somehow the calculation will start again."),
+        br(),
+        h4("3.Examples"),
+        h5("2.1 Single breach"),
+        p("*Step 1: Select as country 'Netherlands"),
+        p("*Step 2: Set waterlevel to 1"),
+        p("*Step 3: Set number of breaches to 'Single'"),
+        p("*Step 4: Set breach width to 1000"),
+        p("*Step 5: x and y coordinates respectively to 46015 and 418028"),
+        p("*Step 6: Press 'Plot!'"),
+        p("*Step 7: After plotting press 'Remove' to remove the DEM of the Netherlands from your pc"),
+        h5("2.2 Multiple breaches"),
+        p("*Step 1: Select as country 'Netherlands"),
+        p("*Step 2: Set waterlevel to 1"),
+        p("*Step 3: Set number of breaches to 'Multiple'"),
+        p("*Step 4: Upload a file with the same data as the example image to the app"),
+        p("*Step 5: Press 'Plot!'"),
+        p("*Step 6: After plotting press 'Remove' to remove the DEM of the Netherlands from your pc")   
+      )
     )
   )
 )

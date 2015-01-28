@@ -30,10 +30,10 @@ shinyServer(function(input, output){
     
     # Create Datafile
     if (RB1==0){
-      validate(need(input$country !="...", "Choose a country.\nIf a country is chosen the data will be downloaded to your harddisk!\nThe files can be deleted by pressing the remove button.\n\nScroll down for help."))
+      validate(need(input$country !="...", "Choose a country.\nIf a country is chosen the data will be downloaded to your harddisk!\nThe files can be deleted by pressing the remove button.\n\nScroll down for help (with examples)."))
       DEM<- getData('alt', country=input$country, mask=F)}
     else if (is.null(input$DEM)){
-      validate(need(input$DEM !=NULL, "Upload a DEM from a specific region.\nRemember that the file extention should be .tif or .grd.\n\nScroll down for help."))}
+      validate(need(input$DEM !=NULL, "Upload a DEM from a specific region.\nRemember that the file extention should be .tif or .grd.\n\nScroll down for help (with examples)."))}
     else if (RB1==1){
       DEM<-raster(input$DEM$datapath)}
     
@@ -45,7 +45,7 @@ shinyServer(function(input, output){
                         detail = 'Step 1: RE-projecting DEM...')}
     return (DEM)
   })
- 
+  
   breach.area<- reactive({
     ## Calculate the breach area
     
@@ -60,7 +60,7 @@ shinyServer(function(input, output){
       try(breach.point<-matrix(c(input$coord.x, input$coord.y), nrow=1, ncol=2))
       dimnames(breach.point)<-list(colnames(breach.point), c('x','y')) } 
     else if (is.null(input$coords)){
-      validate(need(input$coords !=NULL, "Upload a .csv file with two columns representing the 'x' and 'y' coordinates.\nThe columns should be named 'x' and 'y'.\n\nScroll down for help."))}
+      validate(need(input$coords !=NULL, "Upload a .csv file with three columns representing the 'x' and 'y' coordinates and the breach width.\nThe first columns should be named 'x' and 'y'.\n\nScroll down for help (with examples)."))}
     else if (RB2==1){
       multiple.breach<- read.csv(input$coords$datapath)
       breach.point <- subset(multiple.breach, select=1:2)
@@ -148,9 +148,10 @@ shinyServer(function(input, output){
     df <- data.frame(frequency)#Needed for plot
     plot.title = 'Water Depth'
     plot.subtitle = paste("Total flooded area:", format(round(total.area.km2, 2), nsmall=2),"km2")
-    qplot(df$value, df$count, geom="histogram", stat="identity", xlab="Meter", ylab="Area [km2]", fill=I("darkblue"))+
+    qplot(df$value, df$count, geom="histogram", stat="identity", xlab="Meter", ylab="Area [km2]", fill=I("darkblue"), alpha=100)+
       ggtitle(bquote(atop(.(plot.title), atop(italic(.(plot.subtitle)), ""))))+
-      scale_x_continuous(breaks=seq(min(df$value), max(df$value), 1)) 
+      scale_x_continuous(breaks=seq(min(df$value), max(df$value), 1)) + 
+      theme(legend.position='none')
   })
   
   output$removed <- renderText({
