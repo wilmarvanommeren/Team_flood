@@ -39,7 +39,27 @@ breach.area<-calculate.breach.area(breach.point, breach.width)
 # Calculate flooded area
 flooded.area <- calculate.flooded.area(breach.area, breach.height, water.height, DEM)
 
-### Create (elements for) plot ###
+### Create plots with basic plot ###
+
+## Create openstreetmap basemap layer for plot
+osm <- create.openstreetmap(flooded.area)
+
+## Color Palettes
+waterPallette <- colorRampPalette(brewer.pal(9, "Blues"))(20)
+# DEMPallette<-colorRampPalette(c("darkseagreen","darkgreen","darkolivegreen","darkkhaki","darkgoldenrod", "cornsilk","beige"))(20)
+
+## Plot flooded area  
+# plot(extent(flooded.area))
+
+plot(flooded.area, legend=F)
+plot(osm,add=T)
+plot(flooded.area, add=T, col=waterPallette)
+
+# points(breach.point[1], breach.point[2], cex=2, pch=(16), col='red', add=T)
+
+
+
+### Create (elements for) spplot ###
 
 ## Create openstreetmap basemap layer for plot
 osm <- create.openstreetmap(flooded.area)
