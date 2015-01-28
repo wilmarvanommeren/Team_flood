@@ -57,6 +57,8 @@ shinyUI(
       mainPanel(
         # Plot & textoutput
         plotOutput("plot", height='750px'),
+        hr(),
+        plotOutput("hist"),
         textOutput("total"),
         textOutput("removed"),
         br(),# Help
