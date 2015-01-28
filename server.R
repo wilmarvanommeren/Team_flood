@@ -59,15 +59,19 @@ shinyServer(function(input, output){
     else if (is.null(input$coords)){
       validate(need(input$coords !=NULL, "Upload a .csv file with two columns representing the 'x' and 'y' coordinates.\nThe columns should be named 'x' and 'y'.\n\nScroll down for help."))}
     else if (RB2==1){
-      multiple.breach<- read.csv(input$coords$datapath)}
+      multiple.breach<- read.csv(input$coords$datapath)
       breach.point <- subset(multiple.breach, select=1:2)
-      breach.width <- unlist(multiple.breach[3])
+      breach.width <- multiple.breach[3]}
     
     # Calculate breach area
     breach.area<-NULL # If NULL returned the plot function will only plot the DEM
     breach.area<- try(calculate.breach.area(breach.point, breach.width))
     
     return(breach.area)
+  })
+  water <- reactive({
+    validate(need(input$water.height>0, "The waterlevel should be bigger than 0."))
+    water.height<-input$water.height
   })
   
   flood <- reactive({
@@ -76,7 +80,7 @@ shinyServer(function(input, output){
     # Load inputvariables
     DEM <- DEM()
     breach.area<-breach.area()
-    water.height<-input$water.height
+    water.height<-water()
     
     # Include breach area in DEM
     DEM.withbreach <- withProgress(expr=try(merge.breach.DEM(breach.area, DEM)), 
@@ -126,11 +130,9 @@ shinyServer(function(input, output){
   
   output$total <- renderText({
     ## Outputtext that displays the total flooded area
-    input$goButton
-    isolate({
     
     # Load variable
-    flooded.area<-flood()
+    try(flooded.area<-flood())
     
     # Get cellsize 
     resolutionX <-xres(flooded.area)
@@ -141,7 +143,7 @@ shinyServer(function(input, output){
     total.area.m2 <- sum(frequency[,2])*(resolutionX*resolutionY)
     total.area.km2 <- total.area.m2/1000000
       
-    paste("The total flooded area is", format(round(total.area.km2, 2), nsmall=2), 'km2.')})
+    paste("The total flooded area is", format(round(total.area.km2, 2), nsmall=2), 'km2.')
   })
   
   output$removed <- renderText({

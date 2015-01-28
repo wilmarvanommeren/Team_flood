@@ -5,14 +5,8 @@ merge.breach.DEM <- function(breach.area,DEM){
   
   ## Extract minimum value per polygon in breach.area and rasterize the polygons
   min.breach <- c()
-  for (i in range(1:length(breach.area@polygons[[1]]@Polygons))){
-    # Get the coordinates of each polygon
-    poly.coord <- breach.area@polygons[[1]]@Polygons[[i]]@coords
-    
-    # Create new singele polygon from each set of coordinates
-    poly<-Polygon(poly.coord)
-    polys<-Polygons(list(poly),1)
-    sps= SpatialPolygons(list(polys))
+  for (i in (1:length(breach.area))){
+    sps= breach.area[i]
     
     # Extract the minimal value for each unique polygon
     breach.height = min(unlist(extract(DEM, sps)),na.rm=T)
