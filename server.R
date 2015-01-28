@@ -2,7 +2,6 @@
 # Date: January 2015
 
 # Load & install packages if required
-if (!require(shiny)){install.packages("shiny")}
 if (!require(sp)){install.packages("sp")}
 if (!require(igraph)){install.packages("igraph")}
 if (!require(raster)){install.packages("raster")}
@@ -11,12 +10,16 @@ if (!require(RColorBrewer)){install.packages("RColorBrewer")}
 if (!require(proj4)){install.packages("proj4")}
 if (!require(rgeos)){install.packages("rgeos")}
 if (!require(rgdal)){install.packages("rgdal")}
+if (!require(rJava)){install.packages("rJava")}
+if (!require(OpenStreetMap)){install.packages("OpenStreetMap")}
+if (!require(ggplot2)){install.packages("ggplot2")}
 
 # Load source scripts
-source("./r/fill.up.R")
-source("./r/calculate.breach.area.R")
-source("./r/calculate.flooded.area.R")
+source('./r/fill.up.R')
+source('./r/calculate.breach.area.R')
+source('./r/calculate.flooded.area.R')
 source('./r/merge.breach.DEM.R')
+source('./r/create.openstreetmap.R')
 
 # Create plot from the inputvariables
 shinyServer(function(input, output){
@@ -59,15 +62,19 @@ shinyServer(function(input, output){
     else if (is.null(input$coords)){
       validate(need(input$coords !=NULL, "Upload a .csv file with two columns representing the 'x' and 'y' coordinates.\nThe columns should be named 'x' and 'y'.\n\nScroll down for help."))}
     else if (RB2==1){
-      multiple.breach<- read.csv(input$coords$datapath)}
+      multiple.breach<- read.csv(input$coords$datapath)
       breach.point <- subset(multiple.breach, select=1:2)
-      breach.width <- unlist(multiple.breach[3])
+      breach.width <- multiple.breach[3]}
     
     # Calculate breach area
     breach.area<-NULL # If NULL returned the plot function will only plot the DEM
     breach.area<- try(calculate.breach.area(breach.point, breach.width))
     
     return(breach.area)
+  })
+  water <- reactive({
+    validate(need(input$water.height>0, "The waterlevel should be bigger than 0."))
+    water.height<-input$water.height
   })
   
   flood <- reactive({
@@ -76,7 +83,7 @@ shinyServer(function(input, output){
     # Load inputvariables
     DEM <- DEM()
     breach.area<-breach.area()
-    water.height<-input$water.height
+    water.height<-water()
     
     # Include breach area in DEM
     DEM.withbreach <- withProgress(expr=try(merge.breach.DEM(breach.area, DEM)), 
@@ -123,25 +130,27 @@ shinyServer(function(input, output){
                    message = '(Re-)Calculation in progress',
                    detail = 'Step 4: Plotting the map...')}})        
   })
-  
-  output$total <- renderText({
-    ## Outputtext that displays the total flooded area
-    input$goButton
-    isolate({
-    
-    # Load variable
+  output$hist <- renderPlot({
+    ## Histogram of frequencies with the total flooded area
+    # Load data
     flooded.area<-flood()
     
-    # Get cellsize 
+    # Get cellsize
     resolutionX <-xres(flooded.area)
     resolutionY <-yres(flooded.area)
     
-    # Get number of cells and calculate the area
-    frequency <- freq(flooded.area, useNA='no') 
-    total.area.m2 <- sum(frequency[,2])*(resolutionX*resolutionY)
-    total.area.km2 <- total.area.m2/1000000
-      
-    paste("The total flooded area is", format(round(total.area.km2, 2), nsmall=2), 'km2.')})
+    # Calculate Frequency and total flooded area
+    frequency <- freq(flooded.area, useNA='no')
+    frequency[,2]<-(frequency[,2]*(resolutionX*resolutionY))/1000000
+    total.area.km2 <- sum(frequency[,2])
+    
+    # Plot histogram of frequencies with the total flooded area
+    df <- data.frame(frequency)#Needed for plot
+    plot.title = 'Water Depth'
+    plot.subtitle = paste("Total flooded area:", format(round(total.area.km2, 2), nsmall=2),"km2")
+    qplot(df$value, df$count, geom="histogram", stat="identity", xlab="Meter", ylab="Area [km2]", fill=I("darkblue"))+
+      ggtitle(bquote(atop(.(plot.title), atop(italic(.(plot.subtitle)), ""))))+
+      scale_x_continuous(breaks=seq(min(df$value), max(df$value), 1)) 
   })
   
   output$removed <- renderText({

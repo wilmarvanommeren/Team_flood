@@ -12,6 +12,7 @@ if (!require(rgeos)){install.packages("rgeos")}
 if (!require(rgdal)){install.packages("rgdal")}
 if (!require(rJava)){install.packages("rJava")}
 if (!require(OpenStreetMap)){install.packages("OpenStreetMap")}
+if (!require(ggplot2)){install.packages("ggplot2")}
 
 # Load source scripts
 source('./r/fill.up.R')
@@ -31,15 +32,16 @@ breach.point <- click(n=no.of.breaches)
 breach.width = 220
 
 # Example multiple breach
-# multiple.breach<- read.csv("G:/Mijn documenten/Wageningen/Geoscripting/Team_flood/data/coords.csv")
-# breach.point <- subset(multiple.breach, select=1:2)
-# breach.width <- multiple.breach[3]
+multiple.breach<- read.csv("G:/Mijn documenten/Wageningen/Geoscripting/Team_flood/data/coords.csv")
+breach.point <- subset(multiple.breach, select=1:2)
+breach.width <- multiple.breach[3]
 
 # Calculate breach area
 breach.area<-calculate.breach.area(breach.point, breach.width)
 
 # Include breach area in DEM
 DEM.withbreach <- merge.breach.DEM(breach.area, DEM)
+
 
 # Calculate flooded area
 flooded.area <- calculate.flooded.area(breach.area, water.height, DEM, DEM.withbreach)
@@ -57,11 +59,20 @@ spplot (flooded.area, col.regions = waterPallette,
                               )
                          , sp.raster))
 
-# Total flooded area
+## Histogram of frequencies with the total flooded area
+# Get cellsize
 resolutionX <-xres(flooded.area)
 resolutionY <-yres(flooded.area)
-frequency <- freq(flooded.area, useNA='no') 
-total.area.m2 <- sum(frequency[,2])*(resolutionX*resolutionY)
-total.area.km2 <- total.area.m2/1000000
 
-paste("The total flooded area is", format(round(total.area.km2, 2), nsmall=2), 'km2.')
+# Calculate Frequency and total flooded area
+frequency <- freq(flooded.area, useNA='no')
+frequency[,2]<-(frequency[,2]*(resolutionX*resolutionY))/1000000 
+total.area.km2 <- sum(frequency[,2])
+
+# Plot histogram of frequencies with the total flooded area
+df <- data.frame(frequency) #Needed for plot
+plot.title = 'Water Depth'
+plot.subtitle = paste("Total flooded area:", format(round(total.area.km2, 2), nsmall=2),"km2")
+qplot(df$value, df$count, geom="histogram", stat="identity", xlab="Meter", ylab="Area [km2]", fill=I("darkblue"))+
+  ggtitle(bquote(atop(.(plot.title), atop(italic(.(plot.subtitle)), ""))))+
+  scale_x_continuous(breaks=seq(min(df$value), max(df$value), 1))
