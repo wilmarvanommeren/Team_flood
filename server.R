@@ -46,7 +46,7 @@ shinyServer(function(input, output){
                         detail = 'RE-projecting DEM...')}
     return (DEM)
   })
- 
+  
   osm<- reactive({
     ## Create base map for final plot
     # Load variable
@@ -124,17 +124,17 @@ shinyServer(function(input, output){
     
     input$goButton
     isolate({
-    # Load or create remaining inputvariables
-    flooded.area<- flood()
-    breach.area<-breach.area()
-    waterPallette <- colorRampPalette(brewer.pal(9, "Blues"))(20)
-    
-    
-    # Plot base map and flooded.area 
-    withProgress(plot(flooded.area, add=T, col=waterPallette), message = '(Re-)Calculation in progress',
-                 detail = 'Plotting flooded area...')
-    plot(breach.area, add=T, col='red', border='red')})
-})        
+      # Load or create remaining inputvariables
+      flooded.area<- flood()
+      breach.area<-breach.area()
+      waterPallette <- colorRampPalette(brewer.pal(9, "Blues"))(20)
+      
+      
+      # Plot base map and flooded.area 
+      withProgress(plot(flooded.area, add=T, col=waterPallette), message = '(Re-)Calculation in progress',
+                   detail = 'Plotting flooded area...')
+      plot(breach.area, add=T, col='red', border='red')})
+  })        
   
   output$hist <- renderPlot({
     ## Histogram of frequencies with the total flooded area

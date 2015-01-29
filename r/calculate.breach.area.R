@@ -1,5 +1,5 @@
 calculate.breach.area <- function(breach.point, breach.width){
-  # Function to calculate the breach area(s)
+  ## Function to calculate the breach area(s)
   # breach.point: The center location of the breach
   # breach.width: The width of the breach
   
@@ -17,7 +17,7 @@ calculate.breach.area <- function(breach.point, breach.width){
     
     # Create names for all buffers in the list (which will be used as ID's)
     set.seed(1)
-    IDs <- sample(c(LETTERS, letters), 3)
+    IDs <- sample(c(LETTERS, letters), length(unlist(breach.width)))
     names(bufferlist) <- IDs
     
     # Create a single SpatialPolygons object from a list of SpatialPolygons

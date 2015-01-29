@@ -22,10 +22,8 @@ source('./r/merge.breach.DEM.R')
 source('./r/create.openstreetmap.R')
 source('./r/create.polygon.R')
 
-# Load data
-DEM <- raster('./data/AHNschouw/schouw.tif')
-
-# # # Example 1: single breach
+# # Example 1: single breach
+# DEM <- raster('./data/AHNschouw/schouw.tif')
 # water.height <- 2   #meter
 # plot(DEM)          #needed for the click
 # no.of.breaches = 1
@@ -33,8 +31,11 @@ DEM <- raster('./data/AHNschouw/schouw.tif')
 # breach.width = 220
 
 # Example 2: multiple breach
-water.height <- 2   #meter
-multiple.breach<- read.csv("./data/coords.csv")
+DEM <- getData('alt', country='NLD', mask=F)
+water.height <- 1   #meter
+multiple.breach<- read.csv("./data/multiCountry.csv")
+RijksDS<-"+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.417,50.3319,465.552,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs"
+DEM<-projectRaster(DEM, crs=CRS(RijksDS))
 breach.point <- subset(multiple.breach, select=1:2)
 breach.width <- multiple.breach[3]
 
@@ -83,4 +84,3 @@ plot.subtitle = paste("Total flooded area:", format(round(total.area.km2, 2), ns
 qplot(df$value, df$count, geom="histogram", stat="identity", xlab="Meter", ylab="Area [km2]", fill=I("darkblue"), alpha=100)+
   ggtitle(bquote(atop(.(plot.title), atop(italic(.(plot.subtitle)), ""))))+
   scale_x_continuous(breaks=seq(min(df$value), max(df$value), 1)) + theme(legend.position='none')
-

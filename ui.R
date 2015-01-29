@@ -5,10 +5,10 @@
 if (!require(shiny)){install.packages("shiny")}
 if (!require(raster)){install.packages("raster")}
 
-#Set max upload size
+# Set max upload size
 options(shiny.maxRequestSize = 30*1024^2)
 
-#Define list of possible countries
+# Define list of possible countries
 alldata<- getData("ISO3")
 allcodes<-alldata[,1]
 empty<-c("...")
