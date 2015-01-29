@@ -64,11 +64,15 @@ shinyServer(function(input, output){
     ## Calculate the breach area 
     # Get breach point(s) if filled in or uploaded correctly 
     RB2 <- as.integer(input$RB2) 
+    DEM <- DEM()
     
     # Extract breach width(S) and breach point(s)
     if (RB2 == 0){
-      # Get single breach width and point if width is higher than 0 
-      validate(need(input$breach.width!=0, "Enter a breach width higher than 0.\nA breach of 0 can't cause a flood.")) 
+      # Get cellsize for minimum breach width
+      cellsize <-xres(DEM)
+      
+      # Get single breach width and point if width is higher than 0
+      validate(need(input$breach.width>=cellsize, "Enter a breach width higher than 0.\nA breach of 0 can't cause a flood.\nThe minimum breach width should be the minimum cellsize of your input DEM")) 
       breach.width<- input$breach.width 
       breach.point<-matrix(c(input$coord.x, input$coord.y), nrow=1, ncol=2) 
       dimnames(breach.point)<-list(colnames(breach.point), c('x','y')) }#Names needed for creating spatialpoints  
