@@ -67,7 +67,7 @@ plot(SPS, col='white', border='white', xlab='Longitude', ylab='Latitude', axes=T
 box("plot", col="white")  
 plotRGB(raster(osm), add=T)
 grid()
-plot(DEM, add=T, col=waterPallette)
+plot(flooded.area, add=T, col=waterPallette)
 plot(breach.area, add=T, col='red', border='red')
 
 # Create and add a North arrow that takes the extent of the plot in account

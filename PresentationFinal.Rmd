@@ -1,5 +1,5 @@
 ---
-title: "Presentation Team FLood"
+title: "Presentation Team Flood"
 author: "Rob Maas & Wilmar van Ommeren"
 date: "Thursday, January 29, 2015"
 output: slidy_presentation
@@ -8,10 +8,9 @@ output: slidy_presentation
 
 # Introduction
 
-Project: 
-Simulate the flooding a dyke breach would cause
+**Simulate flood by dyke breach**
 
-Content based on main.R:
+Content of presentation:
 
 - Input Data
 - Used functions
@@ -23,9 +22,10 @@ Content based on main.R:
 
 # Input Data
 
-- Base of all scripts is a Digital Elevation Map[DEM]
+Base of all scripts is a Digital Elevation Map[DEM]   
+
 - Algemene Hoogtebestand Nederland
-- Raster package::getData('alt', countrycode)
+- raster::getData('alt', countrycode)
 
 ![DEMs](www/DEM.png)
 
@@ -34,45 +34,37 @@ Content based on main.R:
 
 ### Calculate breach area
 
-- Input breach coordinates and width
-- Create buffer around coordinates 
-- If multiple breaches loop through breaches and create buffer for each breach
-- Output one or multiple SpatialPolygons
+- Create buffer around input coordinates 
+- Turned into a SpatialPolygon
+- Multiple buffers can be made
 
 ![DEMs](www/breacharea.png)
 
 # Used functions
 
-### Create a DEM with breache(s)
+### Create a DEM with breach(es)
 
-- Input DEM and breach.area
-- Extract minimum value for each unique SpatialPolygon
-- Rasterize the polygons
-- Merge polygons with DEM
-- Output DEM with adjusted height for breach areas
+- Extract minimum value of DEM under SpatialPolygon
+- Rasterize polygons and merge with DEM
 
 ![DEMs](www/DEMwithBreach.png)
 
 # Used functions
 
-### Calculate flooded area
+### Simulate flooded area
 
-- Input breach.area, water.height & DEM.withbreach
-- Fill up the DEM with adjusted height. All values lower than the water height are removed and all other cells receive the value (waterheight-height)
-- Group all adjacent rastercells with the same waterdepth value
-- Select groups that are located in the breach area's and set cellvalue to waterdepth
+- Fill the new DEM by removing all cells that are higher then the waterheight
+- Remaining cells: Waterheight - Elevation
+- Only select cells that are adjacent to breach area
 
 ![DEMs](www/waterdepth.png)
 
 # Used functions
 
 ### Create basemap
-
-- Input flooded area
-- Re-project the extent of the flooded area to the coordinate system of OpenStreetMap
+- Re-project the extent of the flooded area(RD) to the coordinate system of OpenStreetMap(wgs84)
 - Download OpenStreetMap data that is within the extent
 - Re-project data to coordinate system of flooded area
-- Output basemap
 
 ![DEMs](www/basemap.png)
 
@@ -111,4 +103,18 @@ circa **300** lines of code!
 
 [Go to application](https://wilmarvanommeren.shinyapps.io/floodrisk/)
 
-# Wat we geleerd hebben
+# Conclusion
+
+## We've learned:
+
+- There is a package for almost everything
+- Most of our problems were not new => much was asked and answered before
+- Using Git allowed us to work separately
+- Not everything is as easy as it looks at first sight
+
+## Questions?
+![DEMs](www/front.jpg)
+
+
+
+
