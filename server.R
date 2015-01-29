@@ -70,15 +70,17 @@ shinyServer(function(input, output){
     
     # Get breach point(s) if filled in or uploaded correctly
     RB2 <- RB2()
-    if (RB2==1){
-      validate(need(input$coords!=NULL, 'a'))
-      multiple.breach <- read.csv(input$coords$datapath)
-      breach.point <- subset(multiple.breach, select=1:2)
-      breach.width <- multiple.breach[3]}
-    else if (RB2 == 0){
-      breach.point<-matrix(c(input$coord.x, input$coord.y), nrow=1, ncol=2)
+    
+    if (RB2 == 0){
+      breach.point<- try(matrix(c(input$coord.x, input$coord.y), nrow=1, ncol=2))
       dimnames(breach.point)<-list(colnames(breach.point), c('x','y')) 
       breach.width<- input$breach.width} 
+    else if (is.null(input$coords)){
+      validate(need(input$coords !=NULL, "Upload a .csv file with two columns representing the 'x' and 'y' coordinates.\nThe columns should be named 'x' and 'y'.\n Press 'Plot!' if uploaded!\n\nScroll down for help."))}
+    else if (RB2==1){
+      multiple.breach<- read.csv(input$coords$datapath)
+      breach.point <- subset(multiple.breach, select=1:2)
+      breach.width <- multiple.breach[3]}
     
     
     # Calculate breach area
