@@ -65,24 +65,34 @@ Create basemap
 
 ## Shiny
 
-UserInterface
+###UserInterface
 
 - Interactive input variables
 
-Server
+###Server
 
 - Create output from these variables
 
-(script)
+![Interactive](www/Interactive.png)
+
+
+But, it's not as easy as it sounds:
+circa **300** lines of code!
+
+![UI](www/UI.png)
 
 ## Output
-Simulate flooding as a result of a levee breach
+
+#Achievements
 
 - Script is working globally
-- Multiple breaches possible
+- Multiple breaches are possible
 - Total flooded area and distribution of waterdepth in a histogram
 - Accessible by everyone, everywhere
-(image Netherlands)
-(image Histogram)
 
-(Link to shiny application)
+# Example Netherlands
+
+![NLD](www/country.png)
+![hist](www/hist.png)
+
+[Go to application](http://https://wilmarvanommeren.shinyapps.io/floodrisk/)
