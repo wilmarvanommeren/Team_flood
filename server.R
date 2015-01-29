@@ -13,6 +13,7 @@ if (!require(rgdal)){install.packages("rgdal")}
 if (!require(rJava)){install.packages("rJava")}
 if (!require(OpenStreetMap)){install.packages("OpenStreetMap")}
 if (!require(ggplot2)){install.packages("ggplot2")}
+if (!require(GISTools)){install.packages("GISTools")}
 
 # Load source scripts
 source('./r/fill.up.R')
@@ -30,12 +31,12 @@ shinyServer(function(input, output){
     RB1 <- as.integer(input$RB1)
     
     # Create Datafile
-    if (RB1==0){
+    if (RB1==0){#Check if country is chosen and get data
       validate(need(input$country !="...", "Choose a country.\nIf a country is chosen the data will be downloaded to your harddisk!\nThe files can be deleted by pressing the remove button.\n\nScroll down for help (with examples)."))
       DEM<- getData('alt', country=input$country, mask=F)}
-    else if (is.null(input$DEM)){
+    else if (is.null(input$DEM)){#Check coordinates are uploaded
       validate(need(input$DEM !=NULL, "Upload a DEM from a specific region.\nRemember that the file extention should be .tif or .grd.\n\nScroll down for help (with examples)."))}
-    else if (RB1==1){
+    else if (RB1==1){#If uploaded Dem is located in the datapath
       DEM<-raster(input$DEM$datapath)}
     
     # Transform DEM if necessary
@@ -47,7 +48,7 @@ shinyServer(function(input, output){
     return (DEM)
   })
   
-  osm<- reactive({
+  osm <- reactive({
     ## Create base map for final plot
     # Load variable
     DEM <- DEM()
@@ -63,30 +64,35 @@ shinyServer(function(input, output){
     ## Calculate the breach area 
     # Get breach point(s) if filled in or uploaded correctly 
     RB2 <- as.integer(input$RB2) 
+    
+    # Extract breach width(S) and breach point(s)
     if (RB2 == 0){
-      # Get breach width if value is higher than 0 
+      # Get single breach width and point if width is higher than 0 
       validate(need(input$breach.width!=0, "Enter a breach width higher than 0.\nA breach of 0 can't cause a flood.")) 
       breach.width<- input$breach.width 
       breach.point<-matrix(c(input$coord.x, input$coord.y), nrow=1, ncol=2) 
-      dimnames(breach.point)<-list(colnames(breach.point), c('x','y')) }  
-    else if (is.null(input$coords)){
+      dimnames(breach.point)<-list(colnames(breach.point), c('x','y')) }#Names needed for creating spatialpoints  
+    else if (is.null(input$coords)){#Check if .csv file is uploaded
       validate(need(input$coords !=NULL, "Upload a .csv file with two columns representing the 'x' and 'y' coordinates.\nThe columns should be named 'x' and 'y'.\n\nScroll down for help."))
     }
-    else if (RB2==1){
+    else if (RB2==1){#if uploaded read the file and create a subset of points and widths
       multiple.breach<- read.csv(input$coords$datapath) 
       breach.point <- subset(multiple.breach, select=1:2) 
       breach.width <- multiple.breach[3]} 
     
     # Calculate breach area 
-    breach.area<-NULL # If NULL returned the plot function will only plot the DEM 
+    breach.area<-NULL # If NULL returned no error but a blank screen will be returned 
     breach.area<- try(calculate.breach.area(breach.point, breach.width)) 
-    return(breach.area) })
+    
+    return(breach.area) 
+    })
   
   water <- reactive({
     ## Return waterheight
-    # Check if height is heigher than 0
+    # Check if height is higher than 0
     validate(need(input$water.height>0, "The waterlevel should be bigger than 0."))
-    water.height<-input$water.height
+    
+    return(input$water.height)
   })
   
   flood <- reactive({
@@ -105,6 +111,7 @@ shinyServer(function(input, output){
     flooded.area<- withProgress(expr=try(calculate.flooded.area(breach.area, water.height, DEM.withbreach)), 
                                 message = '(Re-)Calculation in progress',
                                 detail = 'Calculating the flooded area...')
+    
     return(flooded.area)
   })
   
@@ -115,25 +122,33 @@ shinyServer(function(input, output){
     osm<-osm()# Start creating osm before the go button is clicked
     DEM <-DEM()
     
-    # Create polygon and RGB plot
+    # Create polygon and plot OSM
     SPS <- create.polygon(DEM)
-    plot(SPS, col='white', border='white')
+    plot(SPS, col='white', border='white', axes=T, bty='n',xaxs='i', yaxs='i', xlab='Longitude', ylab='Latitude')
+    box("plot", col="white")  
     withProgress(plotRGB(raster(osm, crs=CRS(projection(flooded.area))),add=T), 
                  message = '(Re-)Calculation in progress',
                  detail = 'Creating plot...')
+    grid()#Add grid at tickmarks
     
-    input$goButton
+    input$goButton #After click
     isolate({
       # Load or create remaining inputvariables
       flooded.area<- flood()
       breach.area<-breach.area()
       waterPallette <- colorRampPalette(brewer.pal(9, "Blues"))(20)
       
-      
-      # Plot base map and flooded.area 
+      # Plot flooded.area and breach area
       withProgress(plot(flooded.area, add=T, col=waterPallette), message = '(Re-)Calculation in progress',
                    detail = 'Plotting flooded area...')
-      plot(breach.area, add=T, col='red', border='red')})
+      plot(breach.area, add=T, col='red', border='red')
+      
+      # Create and add a North arrow that takes the extent of the plot in account
+      x.position<-extent(DEM)[1] + 0.1*(extent(DEM)[2]-extent(DEM)[1])
+      y.position<-extent(DEM)[4] - 0.15*(extent(DEM)[4]-extent(DEM)[3])
+      length <- (((extent(DEM)[4])-(extent(DEM)[3]))*0.035)
+      north.arrow(xb=x.position, yb=y.position, len=length, lab="N")
+      })
   })        
   
   output$hist <- renderPlot({
@@ -152,8 +167,12 @@ shinyServer(function(input, output){
     
     # Plot histogram of frequencies with the total flooded area
     df <- data.frame(frequency)#Needed for plot
+    
+    # Create interactive titles
     plot.title = 'Water Depth'
     plot.subtitle = paste("Total flooded area:", format(round(total.area.km2, 2), nsmall=2),"km2")
+    
+    # Plot histogram
     qplot(df$value, df$count, geom="histogram", stat="identity", xlab="Meter", ylab="Area [km2]", fill=I("darkblue"), alpha=100)+
       ggtitle(bquote(atop(.(plot.title), atop(italic(.(plot.subtitle)), ""))))+
       scale_x_continuous(breaks=seq(min(df$value), max(df$value), 1)) + 
@@ -168,7 +187,7 @@ shinyServer(function(input, output){
     # Search for files
     files <- paste(list.files(pattern='*alt.grd|*alt.gri|*alt.vrt', full.names=T),collapse=', ')
     
-    # Remove files
+    # Remove files if present and show which files are removed
     if (files!=""){
       if (input$remove>0){
         file.remove(list.files(pattern='*alt.grd|*alt.gri|*alt.vrt', full.names=T))

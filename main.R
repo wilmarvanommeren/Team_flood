@@ -13,6 +13,7 @@ if (!require(rgdal)){install.packages("rgdal")}
 if (!require(rJava)){install.packages("rJava")}
 if (!require(OpenStreetMap)){install.packages("OpenStreetMap")}
 if (!require(ggplot2)){install.packages("ggplot2")}
+if (!require(GISTools)){install.packages("GISTools")}
 
 # Load source scripts
 source('./r/fill.up.R')
@@ -22,22 +23,22 @@ source('./r/merge.breach.DEM.R')
 source('./r/create.openstreetmap.R')
 source('./r/create.polygon.R')
 
-# # Example 1: single breach
-# DEM <- raster('./data/AHNschouw/schouw.tif')
-# water.height <- 2   #meter
-# plot(DEM)          #needed for the click
-# no.of.breaches = 1
-# breach.point <- click(n=no.of.breaches)
-# breach.width = 220
+# Example 1: single breach
+DEM <- raster('./data/AHNschouw/schouw.tif') #Use manually downloaded DEM
+water.height <- 2   #meter
+plot(DEM)          #needed for the click
+no.of.breaches = 1
+breach.point <- click(n=no.of.breaches)
+breach.width = 220
 
-# Example 2: multiple breach
-DEM <- getData('alt', country='NLD', mask=F)
-water.height <- 1   #meter
-multiple.breach<- read.csv("./data/multiCountry.csv")
-RijksDS<-"+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.417,50.3319,465.552,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs"
-DEM<-projectRaster(DEM, crs=CRS(RijksDS))
-breach.point <- subset(multiple.breach, select=1:2)
-breach.width <- multiple.breach[3]
+# # # Example 2: multiple breach
+# DEM <- getData('alt', country='NLD', mask=F) #Use automatically downloaded DEM
+# water.height <- 1   #meter
+# multiple.breach<- read.csv("./data/multiCountry.csv")
+# RijksDS<-"+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.417,50.3319,465.552,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs"
+# DEM<-projectRaster(DEM, crs=CRS(RijksDS))
+# breach.point <- subset(multiple.breach, select=1:2)
+# breach.width <- multiple.breach[3]
 
 ############# 1. Calculation of flooded area and base map ############# 
 # Calculate breach area
@@ -58,14 +59,23 @@ osm <- create.openstreetmap(flooded.area)
 waterPallette <- colorRampPalette(brewer.pal(9, "Blues"))(20)
 
 # Create empty polygon to plot on (needed, because the osm needs to be added otherwise the projection will not be correct)
-SPS <- create.polygon(flooded.area)
+SPS <- create.polygon(DEM)
 
 # Plot
-plot(SPS, col='white', border='white')
-plotRGB(raster(osm, crs=CRS(projection(flooded.area))), add=T)
-plot(flooded.area, add=T, col=waterPallette)
+plot(SPS, col='white', border='white', xlab='Longitude', ylab='Latitude', axes=T, bty='n',
+     xaxs='i', yaxs='i')
+box("plot", col="white")  
+plotRGB(raster(osm), add=T)
+grid()
+plot(DEM, add=T, col=waterPallette)
 plot(breach.area, add=T, col='red', border='red')
 
+# Create and add a North arrow that takes the extent of the plot in account
+x.position<-extent(DEM)[1] + 0.1*(extent(DEM)[2]-extent(DEM)[1])
+y.position<-extent(DEM)[4] - 0.15*(extent(DEM)[4]-extent(DEM)[3])
+length <- (((extent(DEM)[4])-(extent(DEM)[3]))*0.035)
+north.arrow(xb=x.position, yb=y.position, len=length, lab="N")
+  
 
 #############  3. Histogram of frequencies with the total flooded area ############# 
 # Get cellsize

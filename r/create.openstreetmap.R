@@ -16,5 +16,6 @@ create.openstreetmap<-function(flooded.area){
   
   # reproject basemap back to flooded area projection
   osm.trans<-openproj(osm, projection= CRS(projection(flooded.area))) 
+  
   return(osm.trans)
 }

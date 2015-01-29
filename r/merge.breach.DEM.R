@@ -6,7 +6,7 @@ merge.breach.DEM <- function(breach.area,DEM){
   ## Extract minimum value per polygon in breach.area and rasterize the polygons
   min.breach <- c()
   for (i in (1:length(breach.area))){
-    sps= breach.area[i]
+    sps= breach.area[i] # Select unique polygon
     
     # Extract the minimal value for each unique polygon
     breach.height = min(unlist(extract(DEM, sps)),na.rm=T)
@@ -16,5 +16,6 @@ merge.breach.DEM <- function(breach.area,DEM){
     poly.rast <- rasterize(sps, DEM, field=min.breach[i])
     DEM<- merge(poly.rast, DEM)
   }
+  
   return (DEM)
 }

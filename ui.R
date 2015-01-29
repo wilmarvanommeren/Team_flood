@@ -20,7 +20,7 @@ allcodes<-append(empty, allcodes)
 shinyUI(
   fluidPage(
     # Title
-    titlePanel(title="The flooded area's after a single or multiple breach(es)",windowTitle="Flood Risk Area's"),
+    titlePanel(title="Simulate the flooded area's after a single or multiple breach(es)",windowTitle="Flood Risk Area's"),
     # Sidebar
     sidebarLayout(
       sidebarPanel( 

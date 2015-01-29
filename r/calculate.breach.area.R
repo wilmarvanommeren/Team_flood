@@ -29,7 +29,7 @@ calculate.breach.area <- function(breach.point, breach.width){
       # The function SpatialPolygons will be applied on the listitems with new IDs
       Pol}))
   } 
-  else{ #If single breach
+  else{ #If single breach create single buffer
     polygon<-buffer(breach.point, width = breach.width)}
   
   return(polygon)
