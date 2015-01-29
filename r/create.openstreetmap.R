@@ -15,7 +15,7 @@ create.openstreetmap<-function(flooded.area){
   osm <- openmap (c(bbox(extent.wgs84)[2,2], bbox(extent.wgs84)[1,1]), c(bbox(extent.wgs84)[2,1], bbox(extent.wgs84)[1,2]))
   
   # reproject basemap back to flooded area projection
-  osm.trans <- openproj (osm, proj4string(extentcorners))
+  osm.trans<-openproj(osm, projection= CRS(projection(flooded.area)))
   
   return(osm.trans)
 }

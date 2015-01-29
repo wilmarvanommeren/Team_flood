@@ -20,6 +20,7 @@ source('./r/calculate.breach.area.R')
 source('./r/calculate.flooded.area.R')
 source('./r/merge.breach.DEM.R')
 source('./r/create.openstreetmap.R')
+source('./r/create.polygon.R')
 
 # Create plot from the inputvariables
 shinyServer(function(input, output){
@@ -48,8 +49,6 @@ shinyServer(function(input, output){
   
   breach.area<- reactive({
     ## Calculate the breach area
-    
-    
     # Get breach width if value is higher than 0
     validate(need(input$breach.width!=0, "Enter a breach width higher than 0.\nA breach of 0 can't cause a flood."))
     breach.width<- input$breach.width
@@ -72,14 +71,16 @@ shinyServer(function(input, output){
     
     return(breach.area)
   })
+  
   water <- reactive({
+    ## Return waterheight
+    # Check if height is heigher than 0
     validate(need(input$water.height>0, "The waterlevel should be bigger than 0."))
     water.height<-input$water.height
   })
   
   flood <- reactive({
     ## Calculate the flooded area
-    
     # Load inputvariables
     DEM <- DEM()
     breach.area<-breach.area()
@@ -97,39 +98,43 @@ shinyServer(function(input, output){
     return(flooded.area)
   })
   
+  osm<- reactive({
+    ## Create base map for final plot
+    # Load variable
+    DEM <- DEM()
+    
+    # Create base map
+    osm <- withProgress(create.openstreetmap(DEM), 
+                        message = '(Re-)Calculation in progress',
+                        detail = 'Step 4: Creating base map...')
+    return(osm)
+  })
+  
   output$plot<-renderPlot({
     ## Create plot (only after the goButton is clicked)
+    # Load base map
+    osm<-osm()# Start creating osm before the go button is clicked
+    SPS <- create.polygon(flooded.area)
+    plot(SPS, col='white', border='white')
+    withProgress(plotRGB(raster(osm, crs=CRS(projection(flooded.area))),add=T), 
+                 message = '(Re-)Calculation in progress',
+                 detail = 'Step 5: Plotting base map...')
+    
     input$goButton
     isolate({
-    
-    #Load inputvariables
+    #Load or create remaining inputvariables
     flooded.area<- flood()
     DEM <-DEM()
     breach.area<-breach.area()
+    waterPallette <- colorRampPalette(brewer.pal(9, "Blues"))(20)
     
-    # Create colorPallettes
-    WATERPallette <- colorRampPalette(brewer.pal(9, "Blues"))(20)
-    DEMPallette<-colorRampPalette(c("darkseagreen","darkgreen","darkolivegreen","darkkhaki","darkgoldenrod", "cornsilk","beige"))(20)
     
-    # Plot (only) if the button is clicked for the first time
-    if (input$goButton==0){
-      return(NULL)}
-    else if (is.null(breach.area)){
-      # If no breach area could be calculated only the DEM will be returned
-      withProgress(spplot(DEM, col.regions=DEMPallette, main='Digital Elevation Map\nHeight in meters',
-                          xlab='Longitude',ylab='Latitude', scales = list(draw = TRUE)), 
-                   message = '(Re-)Calculation in progress',
-                   detail = 'Step 4: Plotting the map...')} 
-    else {
-      # Plot if everything went correct
-      withProgress(spplot (flooded.area, col.regions = WATERPallette, main='Flooded Area\nWaterdepth in meters',
-                           xlab='Longitude',ylab='Latitude', scales = list(draw = TRUE), 
-                           sp.layout=list(list('sp.polygons', breach.area, 
-                                               col='red', fill='red', first=FALSE)))+
-                     as.layer(spplot(DEM, col.regions=DEMPallette), under=T), 
-                   message = '(Re-)Calculation in progress',
-                   detail = 'Step 4: Plotting the map...')}})        
-  })
+    # Plot base map and flooded.area 
+    withProgress(plot(flooded.area, add=T, col=waterPallette), message = '(Re-)Calculation in progress',
+                 detail = 'Step 6: Plotting flooded area...')
+    plot(breach.area, add=T, col='red', border='red')})
+})        
+  
   output$hist <- renderPlot({
     ## Histogram of frequencies with the total flooded area
     # Load data
@@ -156,6 +161,7 @@ shinyServer(function(input, output){
   
   output$removed <- renderText({
     ## Outputtext that displays the files that are removed
+    # Load variable
     input$remove
     
     # Search for files

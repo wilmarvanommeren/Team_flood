@@ -20,6 +20,7 @@ source('./r/calculate.breach.area.R')
 source('./r/calculate.flooded.area.R')
 source('./r/merge.breach.DEM.R')
 source('./r/create.openstreetmap.R')
+source('./r/create.polygon.R')
 
 # Load data
 DEM <- raster('./data/AHNschouw/ahn2_5_64gn2.tif')
@@ -31,11 +32,12 @@ no.of.breaches = 1
 breach.point <- click(n=no.of.breaches)
 breach.width = 220
 
-# Example multiple breach
-multiple.breach<- read.csv("G:/Mijn documenten/Wageningen/Geoscripting/Team_flood/data/coords.csv")
-breach.point <- subset(multiple.breach, select=1:2)
-breach.width <- multiple.breach[3]
+# # Example multiple breach
+# multiple.breach<- read.csv("G:/Mijn documenten/Wageningen/Geoscripting/Team_flood/data/coords.csv")
+# breach.point <- subset(multiple.breach, select=1:2)
+# breach.width <- multiple.breach[3]
 
+############# 1. Calculation of flooded area and base map ############# 
 # Calculate breach area
 breach.area<-calculate.breach.area(breach.point, breach.width)
 
@@ -49,17 +51,26 @@ flooded.area <- calculate.flooded.area(breach.area, water.height, DEM, DEM.withb
 # Create openstreetmap layer for plot
 osm <- create.openstreetmap(flooded.area)
 
-# Plot flooded area
-waterPallette <- colorRampPalette(brewer.pal(9, "Blues"))(20)
-DEMPallette<-colorRampPalette(c("darkseagreen","darkgreen","darkolivegreen","darkkhaki","darkgoldenrod", "cornsilk","beige"))(20)
-spplot (flooded.area, col.regions = waterPallette, 
-        main='Flooded Area', sub='Waterheight [m]', 
-        xlab='Longitude',ylab='Latitude', scales = list(draw = TRUE)
-        , sp.layout=list(list('sp.polygons', breach.area, col='red', fill='red', first=FALSE
-                              )
-                         , sp.raster))
 
-## Histogram of frequencies with the total flooded area
+
+
+############# 2. Plot basemap and flooded.area ############# 
+# Create colors
+waterPallette <- colorRampPalette(brewer.pal(9, "Blues"))(20)
+
+# Create empty polygon to plot on (needed, because the osm needs to be added otherwise the projection will not be correct)
+SPS <- create.polygon(flooded.area)
+
+# Plot
+plot(SPS, col='white', border='white')
+plotRGB(raster(osm, crs=CRS(projection(flooded.area))), add=T)
+plot(flooded.area, add=T, col=waterPallette)
+plot(breach.area, add=T, col='red', border='red')
+
+
+
+
+#############  3. Histogram of frequencies with the total flooded area ############# 
 # Get cellsize
 resolutionX <-xres(flooded.area)
 resolutionY <-yres(flooded.area)
@@ -76,3 +87,4 @@ plot.subtitle = paste("Total flooded area:", format(round(total.area.km2, 2), ns
 qplot(df$value, df$count, geom="histogram", stat="identity", xlab="Meter", ylab="Area [km2]", fill=I("darkblue"), alpha=100)+
   ggtitle(bquote(atop(.(plot.title), atop(italic(.(plot.subtitle)), ""))))+
   scale_x_continuous(breaks=seq(min(df$value), max(df$value), 1)) + theme(legend.position='none')
+
