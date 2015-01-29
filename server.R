@@ -47,23 +47,39 @@ shinyServer(function(input, output){
     return (DEM)
   })
   
+  osm<- reactive({
+    ## Create base map for final plot
+    # Load variable
+    DEM <- DEM()
+    
+    # Create base map
+    osm <- withProgress(create.openstreetmap(DEM), 
+                        message = '(Re-)Calculation in progress',
+                        detail = 'Step 2: Creating base map...')
+    return(osm)
+  })
+
+  RB2<- reactive({
+    return(as.integer(input$RB2))
+  })
+  
   breach.area<- reactive({
     ## Calculate the breach area
     # Get breach width if value is higher than 0
-    validate(need(input$breach.width!=0, "Enter a breach width higher than 0.\nA breach of 0 can't cause a flood."))
-    breach.width<- input$breach.width
+#     validate(need(input$breach.width!=0, "Enter a breach width higher than 0.\nA breach of 0 can't cause a flood."))
     
     # Get breach point(s) if filled in or uploaded correctly
-    RB2 <- as.integer(input$RB2)
-    if (RB2 == 0){
-      try(breach.point<-matrix(c(input$coord.x, input$coord.y), nrow=1, ncol=2))
-      dimnames(breach.point)<-list(colnames(breach.point), c('x','y')) } 
-    else if (is.null(input$coords)){
-      validate(need(input$coords !=NULL, "Upload a .csv file with three columns representing the 'x' and 'y' coordinates and the breach width.\nThe first columns should be named 'x' and 'y'.\n\nScroll down for help (with examples)."))}
-    else if (RB2==1){
-      multiple.breach<- read.csv(input$coords$datapath)
+    RB2 <- RB2()
+    if (RB2==1){
+      validate(need(input$coords!=NULL, 'a'))
+      multiple.breach <- read.csv(input$coords$datapath)
       breach.point <- subset(multiple.breach, select=1:2)
       breach.width <- multiple.breach[3]}
+    else if (RB2 == 0){
+      breach.point<-matrix(c(input$coord.x, input$coord.y), nrow=1, ncol=2)
+      dimnames(breach.point)<-list(colnames(breach.point), c('x','y')) 
+      breach.width<- input$breach.width} 
+    
     
     # Calculate breach area
     breach.area<-NULL # If NULL returned the plot function will only plot the DEM
@@ -89,47 +105,39 @@ shinyServer(function(input, output){
     # Include breach area in DEM
     DEM.withbreach <- withProgress(expr=try(merge.breach.DEM(breach.area, DEM)), 
                                    message = '(Re-)Calculation in progress',
-                                   detail = 'Step 2: Merging breach with DEM...')
+                                   detail = 'Step 3: Merging breach with DEM...')
     
     # Calculate flooded area
     flooded.area<- withProgress(expr=try(calculate.flooded.area(breach.area, water.height, DEM, DEM.withbreach)), 
                                 message = '(Re-)Calculation in progress',
-                                detail = 'Step 3: Calculating the flooded area...')
+                                detail = 'Step 4: Calculating the flooded area...')
     return(flooded.area)
   })
   
-  osm<- reactive({
-    ## Create base map for final plot
-    # Load variable
-    DEM <- DEM()
-    
-    # Create base map
-    osm <- withProgress(create.openstreetmap(DEM), 
-                        message = '(Re-)Calculation in progress',
-                        detail = 'Step 4: Creating base map...')
-    return(osm)
-  })
   
   output$plot<-renderPlot({
     ## Create plot (only after the goButton is clicked)
     # Load base map
     osm<-osm()# Start creating osm before the go button is clicked
-    SPS <- create.polygon(flooded.area)
+    DEM <-DEM()
+    
+    # Create polygon and RGB plot
+    SPS <- create.polygon(DEM)
     plot(SPS, col='white', border='white')
     withProgress(plotRGB(raster(osm, crs=CRS(projection(flooded.area))),add=T), 
                  message = '(Re-)Calculation in progress',
-                 detail = 'Step 5: Plotting base map...')
+                 detail = 'Step 5: Creating plot...')
     
     input$goButton
     isolate({
-    #Load or create remaining inputvariables
+    # Load or create remaining inputvariables
     flooded.area<- flood()
-    DEM <-DEM()
     breach.area<-breach.area()
     waterPallette <- colorRampPalette(brewer.pal(9, "Blues"))(20)
     
     
     # Plot base map and flooded.area 
+    
     withProgress(plot(flooded.area, add=T, col=waterPallette), message = '(Re-)Calculation in progress',
                  detail = 'Step 6: Plotting flooded area...')
     plot(breach.area, add=T, col='red', border='red')})

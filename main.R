@@ -25,17 +25,17 @@ source('./r/create.polygon.R')
 # Load data
 DEM <- raster('./data/AHNschouw/ahn2_5_64gn2.tif')
 
-# Project parameter(s)
-water.height <- 2   #meter
-plot(DEM)          #needed for the click
-no.of.breaches = 1
-breach.point <- click(n=no.of.breaches)
-breach.width = 220
+# # Example 1: single breach
+# plot(DEM)          #needed for the click
+# no.of.breaches = 1
+# breach.point <- click(n=no.of.breaches)
+# breach.width = 220
 
-# # Example multiple breach
-# multiple.breach<- read.csv("G:/Mijn documenten/Wageningen/Geoscripting/Team_flood/data/coords.csv")
-# breach.point <- subset(multiple.breach, select=1:2)
-# breach.width <- multiple.breach[3]
+# Example 2: multiple breach
+water.height <- 2   #meter
+multiple.breach<- read.csv("G:/Mijn documenten/Wageningen/Geoscripting/Team_flood/data/coords.csv")
+breach.point <- subset(multiple.breach, select=1:2)
+breach.width <- multiple.breach[3]
 
 ############# 1. Calculation of flooded area and base map ############# 
 # Calculate breach area
@@ -43,7 +43,6 @@ breach.area<-calculate.breach.area(breach.point, breach.width)
 
 # Include breach area in DEM
 DEM.withbreach <- merge.breach.DEM(breach.area, DEM)
-
 
 # Calculate flooded area
 flooded.area <- calculate.flooded.area(breach.area, water.height, DEM, DEM.withbreach)
