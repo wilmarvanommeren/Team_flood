@@ -1,5 +1,5 @@
 create.openstreetmap<-function(flooded.area){
-  ### INSERTING OPEN STREET MAP ###
+  ## Function to create a base map based on the extent of the flooded.area
   # Extract the corners of the extent
   topleft <- cbind(extent(flooded.area)[1], extent(flooded.area)[4])   # top left coordinate of extent
   botright <- cbind(extent(flooded.area)[2], extent(flooded.area)[3])   # bottom right coordinate of extent

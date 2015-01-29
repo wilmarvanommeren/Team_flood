@@ -1,4 +1,4 @@
-calculate.flooded.area <- function(breach.area, water.height, DEM, DEM.withbreach){
+calculate.flooded.area <- function(breach.area, water.height, DEM.withbreach){
   ## Function to calculate the flooded area's
   # Breach.area: The area of the breach
   # DEM: The Digital Elevation Model of the area  
@@ -18,4 +18,3 @@ calculate.flooded.area <- function(breach.area, water.height, DEM, DEM.withbreac
   
   return(water.dept)
 }
-?clump

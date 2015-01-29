@@ -98,7 +98,7 @@ shinyServer(function(input, output){
                                    detail = 'Step 3: Merging breach with DEM...')
     
     # Calculate flooded area
-    flooded.area<- withProgress(expr=try(calculate.flooded.area(breach.area, water.height, DEM, DEM.withbreach)), 
+    flooded.area<- withProgress(expr=try(calculate.flooded.area(breach.area, water.height, DEM.withbreach)), 
                                 message = '(Re-)Calculation in progress',
                                 detail = 'Step 4: Calculating the flooded area...')
     return(flooded.area)

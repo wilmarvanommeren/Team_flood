@@ -47,7 +47,7 @@ breach.area<-calculate.breach.area(breach.point, breach.width)
 DEM.withbreach <- merge.breach.DEM(breach.area, DEM)
 
 # Calculate flooded area
-flooded.area <- calculate.flooded.area(breach.area, water.height, DEM, DEM.withbreach)
+flooded.area <- calculate.flooded.area(breach.area, water.height, DEM.withbreach)
 
 # Create openstreetmap layer for plot
 osm <- create.openstreetmap(flooded.area)

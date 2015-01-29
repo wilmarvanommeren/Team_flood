@@ -1,0 +1,88 @@
+---
+title: "Presentation Team FLood"
+author: "Rob Maas & Wilmar van Ommeren"
+date: "Thursday, January 29, 2015"
+output: slidy_presentation
+---
+
+## Introduction
+
+Project: 
+Simulate flooding as a result of a levee breach
+
+Content based on main.R:
+
+- Input Data
+- Used functions
+- Shiny
+- Output
+(image of goal)
+
+## Input Data
+
+- Base of all scripts is a Digital Elevation Map[DEM]
+- Algemene Hoogtebestand Nederland
+- Raster package::getData('alt', countrycode)
+
+(image of AHN, image getData)
+
+## Used functions
+
+Calculate breach area
+
+- Input breach coordinates and width
+- Create buffer around coordinates 
+- If multiple breaches loop through breaches and create buffer for each breach
+- Output one or multiple SpatialPolygons
+(image)
+
+Create a DEM with breache(s)
+
+- Input DEM and breach.area
+- Extract minimum value for each unique SpatialPolygon
+- Rasterize the polygons
+- Merge polygons with DEM
+- Output DEM with adjusted height for breach areas
+(image)
+
+Calculate flooded area
+
+- Input breach.area, water.height & DEM.withbreach
+- Fill up the DEM with adjusted height. All values lower than the water height are removed and all other cells receive the value (waterheight-height)
+- Group all adjacent rastercells with the same waterdepth value
+- Select groups that are located in the breach area's and set cellvalue to waterdepth
+(image)
+
+Create basemap
+
+- Input flooded area
+- Re-project the extent of the flooded area to the coordinate system of OpenStreetMap
+- Download OpenStreetMap data that is within the extent
+- Re-project data to coordinate system of flooded area
+- Output basemap
+(image)
+
+
+## Shiny
+
+UserInterface
+
+- Interactive input variables
+
+Server
+
+- Create output from these variables
+
+(script)
+
+## Output
+Simulate flooding as a result of a levee breach
+
+- Script is working globally
+- Multiple breaches possible
+- Total flooded area and distribution of waterdepth in a histogram
+- Accessible by everyone, everywhere
+(image Netherlands)
+(image Histogram)
+
+(Link to shiny application)
