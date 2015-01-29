@@ -54,7 +54,7 @@ Base of all scripts is a Digital Elevation Map[DEM]
 ### Simulate flooded area
 
 - Fill the new DEM by removing all cells that are higher then the waterheight
-- Remaining cells: Waterheight - Elevation
+- Calculate water depth in remaining cells: Waterheight - Elevation
 - Only select cells that are adjacent to breach area
 
 ![DEMs](www/waterdepth.png)
