@@ -1,25 +1,32 @@
 ---
-title: "Presentation Team Flood"
+title: "Team Flood Presentation"
 author: "Rob Maas & Wilmar van Ommeren"
 date: "Thursday, January 29, 2015"
-output: slidy_presentation
+output: 
+  ioslides_presentation:
+    transition: faster
+    widescreen: true
+    smaller: false
 ---
 
 
-# Introduction
+## Introduction
 
 **Simulate flood by dyke breach**
 
 Content of presentation:
 
-- Input Data
-- Used functions
-- Shiny
-- Output
+<div class="columns-2">
+  - Input Data
+  - Used functions
+  - Shiny
+  - Output
 
-![DEMs](www/intro.jpg)
+  ![Goal](www/intro.jpg)
+</div>
 
-# Input Data
+
+## Input Data
 
 Base of all scripts is a Digital Elevation Map[DEM]   
 
@@ -29,7 +36,7 @@ Base of all scripts is a Digital Elevation Map[DEM]
 ![DEMs](www/DEM.png)
 
   
-# Used functions
+## Used functions
 
 ### Calculate breach area
 
@@ -39,7 +46,7 @@ Base of all scripts is a Digital Elevation Map[DEM]
 
 ![DEMs](www/breacharea.png)
 
-# Used functions
+## Used functions
 
 ### Create a DEM with breach(es)
 
@@ -48,7 +55,7 @@ Base of all scripts is a Digital Elevation Map[DEM]
 
 ![DEMs](www/DEMwithBreach.png)
 
-# Used functions
+## Used functions
 
 ### Simulate flooded area
 
@@ -58,7 +65,7 @@ Base of all scripts is a Digital Elevation Map[DEM]
 
 ![DEMs](www/waterdepth.png)
 
-# Used functions
+## Used functions
 
 ### Create basemap
 - Re-project the extent of the flooded area(RD) to the coordinate system of OpenStreetMap(wgs84)
@@ -68,48 +75,59 @@ Base of all scripts is a Digital Elevation Map[DEM]
 ![DEMs](www/basemap.png)
 
 
-# Shiny
+## Shiny
+<div class="columns-2">
+  **UserInterface**   
+  - Interactive input variables
+  
+  **Server**      
+  - Create output from these variables
+  
+  
+  ![Interactive](www/Interactive.png)
+</div>
 
-###UserInterface
-
-- Interactive input variables
-
-###Server
-
-- Create output from these variables
-
-![Interactive](www/Interactive.png)
-
-
+## Shiny
 But, it's not as easy as it sounds:
 circa **300** lines of code!
 
-![UI](www/UI.png)
+![UI](www/UI2.png)
 
-# Output
+## Output
 
-## Achievements
+### Achievements
 
 - Script is working globally
 - Multiple breaches are possible
 - Total flooded area and distribution of waterdepth in a histogram
 - Accessible by everyone, everywhere
 
-## Example Netherlands
+## Output
 
-![NLD](www/country.png)
-![hist](www/hist.png)
+### Example Netherlands
 
+<div class="columns-2">
+  ![NLD](www/country2.png)
+
+  ![hist](www/hist2.png)
+</div>
+
+<div class="centered">
 [Go to application](https://wilmarvanommeren.shinyapps.io/floodrisk/)
+</div>
 
-# Conclusion
 
-## We've learned:
+
+## Conclusion
+
+### We've learned:
 
 - There is a package for almost everything
-- Most of our problems were not new => much was asked and answered before
+- Our problems were not new, much was asked and answered before
 - Using Git allowed us to work separately
 - Not everything is as easy as it looks at first sight
 
-## Questions?
-![DEMs](www/front.jpg)
+
+### Questions?
+
+
