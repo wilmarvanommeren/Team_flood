@@ -124,7 +124,8 @@ shinyServer(function(input, output){
     
     # Create polygon and plot OSM
     SPS <- create.polygon(DEM)
-    plot(SPS, col='white', border='white', axes=T, bty='n',xaxs='i', yaxs='i', xlab='Longitude', ylab='Latitude')
+    plot(SPS, col='white', border='white', axes=T, bty='n',xaxs='i', yaxs='i', 
+         xlab='Longitude', ylab='Latitude',main="Waterdepth in flooded area's [m]")
     box("plot", col="white")  
     withProgress(plotRGB(raster(osm, crs=CRS(projection(flooded.area))),add=T), 
                  message = '(Re-)Calculation in progress',
@@ -144,9 +145,9 @@ shinyServer(function(input, output){
       plot(breach.area, add=T, col='red', border='red')
       
       # Create and add a North arrow that takes the extent of the plot in account
-      x.position<-extent(DEM)[1] + 0.1*(extent(DEM)[2]-extent(DEM)[1])
-      y.position<-extent(DEM)[4] - 0.15*(extent(DEM)[4]-extent(DEM)[3])
-      length <- (((extent(DEM)[4])-(extent(DEM)[3]))*0.035)
+      x.position<-extent(flooded.area)[1] + 0.1*(extent(flooded.area)[2]-extent(flooded.area)[1])
+      y.position<-extent(flooded.area)[4] - 0.15*(extent(flooded.area)[4]-extent(flooded.area)[3])
+      length <- (((extent(flooded.area)[4])-(extent(flooded.area)[3]))*0.035)
       north.arrow(xb=x.position, yb=y.position, len=length, lab="N")
       })
   })        

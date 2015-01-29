@@ -59,21 +59,21 @@ osm <- create.openstreetmap(flooded.area)
 waterPallette <- colorRampPalette(brewer.pal(9, "Blues"))(20)
 
 # Create empty polygon to plot on (needed, because the osm needs to be added otherwise the projection will not be correct)
-SPS <- create.polygon(DEM)
+SPS <- create.polygon(flooded.area)
 
 # Plot
 plot(SPS, col='white', border='white', xlab='Longitude', ylab='Latitude', axes=T, bty='n',
-     xaxs='i', yaxs='i')
+     xaxs='i', yaxs='i', main="Waterdepth in flooded area's [m]")
 box("plot", col="white")  
 plotRGB(raster(osm), add=T)
 grid()
-plot(DEM, add=T, col=waterPallette)
+plot(flooded.area, add=T, col=waterPallette)
 plot(breach.area, add=T, col='red', border='red')
 
 # Create and add a North arrow that takes the extent of the plot in account
-x.position<-extent(DEM)[1] + 0.1*(extent(DEM)[2]-extent(DEM)[1])
-y.position<-extent(DEM)[4] - 0.15*(extent(DEM)[4]-extent(DEM)[3])
-length <- (((extent(DEM)[4])-(extent(DEM)[3]))*0.035)
+x.position<-extent(flooded.area)[1] + 0.1*(extent(flooded.area)[2]-extent(flooded.area)[1])
+y.position<-extent(flooded.area)[4] - 0.15*(extent(flooded.area)[4]-extent(flooded.area)[3])
+length <- (((extent(flooded.area)[4])-(extent(flooded.area)[3]))*0.035)
 north.arrow(xb=x.position, yb=y.position, len=length, lab="N")
   
 

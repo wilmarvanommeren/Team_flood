@@ -19,8 +19,8 @@ allcodes<-append(empty, allcodes)
 # Define UI for application that calculates and plots the flooded area
 shinyUI(
   fluidPage(
-    # Title
-    titlePanel(title="Simulate the flooded area's after a single or multiple breach(es)",windowTitle="Flood Risk Area's"),
+    # Title and tab-title in browser
+    titlePanel(title="Simulate the flooded area's after a single or multiple breach(es)",windowTitle="Simulate Flood Risk Area's"),
     # Sidebar
     sidebarLayout(
       sidebarPanel( 
