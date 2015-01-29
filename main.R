@@ -23,19 +23,21 @@ source('./r/create.openstreetmap.R')
 source('./r/create.polygon.R')
 
 # Load data
-DEM <- raster('./data/AHNschouw/ahn2_5_64gn2.tif')
+DEM <- raster('./data/AHNschouw/schouw.tif')
 
 # # Example 1: single breach
-# plot(DEM)          #needed for the click
-# no.of.breaches = 1
-# breach.point <- click(n=no.of.breaches)
-# breach.width = 220
+water.height <- 2   #meter
+plot(DEM)          #needed for the click
+no.of.breaches = 1
+breach.point <- click(n=no.of.breaches)
+breach.width = 220
 
 # Example 2: multiple breach
-water.height <- 2   #meter
-multiple.breach<- read.csv("G:/Mijn documenten/Wageningen/Geoscripting/Team_flood/data/coords.csv")
-breach.point <- subset(multiple.breach, select=1:2)
-breach.width <- multiple.breach[3]
+# water.height <- 2   #meter
+# multiple.breach<- read.csv("./data/coords.csv")
+# breach.point <- subset(multiple.breach, select=1:2)
+# breach.width <- multiple.breach[3]
+
 
 ############# 1. Calculation of flooded area and base map ############# 
 # Calculate breach area
@@ -51,8 +53,6 @@ flooded.area <- calculate.flooded.area(breach.area, water.height, DEM, DEM.withb
 osm <- create.openstreetmap(flooded.area)
 
 
-
-
 ############# 2. Plot basemap and flooded.area ############# 
 # Create colors
 waterPallette <- colorRampPalette(brewer.pal(9, "Blues"))(20)
@@ -65,8 +65,6 @@ plot(SPS, col='white', border='white')
 plotRGB(raster(osm, crs=CRS(projection(flooded.area))), add=T)
 plot(flooded.area, add=T, col=waterPallette)
 plot(breach.area, add=T, col='red', border='red')
-
-
 
 
 #############  3. Histogram of frequencies with the total flooded area ############# 
