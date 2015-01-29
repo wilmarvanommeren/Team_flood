@@ -25,19 +25,18 @@ source('./r/create.polygon.R')
 # Load data
 DEM <- raster('./data/AHNschouw/schouw.tif')
 
-# # Example 1: single breach
-water.height <- 2   #meter
-plot(DEM)          #needed for the click
-no.of.breaches = 1
-breach.point <- click(n=no.of.breaches)
-breach.width = 220
+# # # Example 1: single breach
+# water.height <- 2   #meter
+# plot(DEM)          #needed for the click
+# no.of.breaches = 1
+# breach.point <- click(n=no.of.breaches)
+# breach.width = 220
 
 # Example 2: multiple breach
-# water.height <- 2   #meter
-# multiple.breach<- read.csv("./data/coords.csv")
-# breach.point <- subset(multiple.breach, select=1:2)
-# breach.width <- multiple.breach[3]
-
+water.height <- 2   #meter
+multiple.breach<- read.csv("./data/coords.csv")
+breach.point <- subset(multiple.breach, select=1:2)
+breach.width <- multiple.breach[3]
 
 ############# 1. Calculation of flooded area and base map ############# 
 # Calculate breach area

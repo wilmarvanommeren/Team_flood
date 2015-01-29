@@ -43,7 +43,7 @@ shinyServer(function(input, output){
     if (regexpr("+proj=stere*", projection(DEM))<1){
       DEM<-withProgress(expr=projectRaster(DEM, crs=CRS(RijksDS)), 
                         message = '(Re-)Calculation in progress',
-                        detail = 'Step 1: RE-projecting DEM...')}
+                        detail = 'RE-projecting DEM...')}
     return (DEM)
   })
  
@@ -55,28 +55,32 @@ shinyServer(function(input, output){
     # Create base map
     osm <- withProgress(create.openstreetmap(DEM), 
                         message = '(Re-)Calculation in progress',
-                        detail = 'Step 2: Creating base map...')
+                        detail = 'Creating base map...')
     return(osm)
   })
-
-
+  
   breach.area<- reactive({ 
     ## Calculate the breach area 
     # Get breach point(s) if filled in or uploaded correctly 
     RB2 <- as.integer(input$RB2) 
-    if (RB2 == 0){ 
-      try(breach.point<-matrix(c(input$coord.x, input$coord.y), nrow=1, ncol=2)) 
-      dimnames(breach.point)<-list(colnames(breach.point), c('x','y'))
+    if (RB2 == 0){
+      # Get breach width if value is higher than 0 
+      validate(need(input$breach.width!=0, "Enter a breach width higher than 0.\nA breach of 0 can't cause a flood.")) 
       breach.width<- input$breach.width 
-      breach.area<-calculate.breach.area(breach.point, breach.width)}
+      breach.point<-matrix(c(input$coord.x, input$coord.y), nrow=1, ncol=2) 
+      dimnames(breach.point)<-list(colnames(breach.point), c('x','y')) }  
+    else if (is.null(input$coords)){
+      validate(need(input$coords !=NULL, "Upload a .csv file with two columns representing the 'x' and 'y' coordinates.\nThe columns should be named 'x' and 'y'.\n\nScroll down for help."))
+    }
     else if (RB2==1){
       multiple.breach<- read.csv(input$coords$datapath) 
       breach.point <- subset(multiple.breach, select=1:2) 
-      breach.width <- multiple.breach[3]
-      breach.area<-calculate.breach.area(breach.point, breach.width)}
-    return(breach.area) 
-  }) 
-  
+      breach.width <- multiple.breach[3]} 
+    
+    # Calculate breach area 
+    breach.area<-NULL # If NULL returned the plot function will only plot the DEM 
+    breach.area<- try(calculate.breach.area(breach.point, breach.width)) 
+    return(breach.area) })
   
   water <- reactive({
     ## Return waterheight
@@ -95,12 +99,12 @@ shinyServer(function(input, output){
     # Include breach area in DEM
     DEM.withbreach <- withProgress(expr=try(merge.breach.DEM(breach.area, DEM)), 
                                    message = '(Re-)Calculation in progress',
-                                   detail = 'Step 3: Merging breach with DEM...')
+                                   detail = 'Merging breach with DEM...')
     
     # Calculate flooded area
     flooded.area<- withProgress(expr=try(calculate.flooded.area(breach.area, water.height, DEM.withbreach)), 
                                 message = '(Re-)Calculation in progress',
-                                detail = 'Step 4: Calculating the flooded area...')
+                                detail = 'Calculating the flooded area...')
     return(flooded.area)
   })
   
@@ -116,7 +120,7 @@ shinyServer(function(input, output){
     plot(SPS, col='white', border='white')
     withProgress(plotRGB(raster(osm, crs=CRS(projection(flooded.area))),add=T), 
                  message = '(Re-)Calculation in progress',
-                 detail = 'Step 5: Creating plot...')
+                 detail = 'Creating plot...')
     
     input$goButton
     isolate({
@@ -128,7 +132,7 @@ shinyServer(function(input, output){
     
     # Plot base map and flooded.area 
     withProgress(plot(flooded.area, add=T, col=waterPallette), message = '(Re-)Calculation in progress',
-                 detail = 'Step 6: Plotting flooded area...')
+                 detail = 'Plotting flooded area...')
     plot(breach.area, add=T, col='red', border='red')})
 })        
   

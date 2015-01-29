@@ -12,7 +12,7 @@ calculate.breach.area <- function(breach.point, breach.width){
   if (length(unlist(breach.width))>1){ #if multiple breaches go in the forloop
     for (i in (1:length(breach.width[,1]))){
       # Lists a buffer per breach, dependent on the breach.width
-      buffer<-buffer(breach.point[i], width = multiple.breach[3][i,]) 
+      buffer<-buffer(breach.point[i], width = breach.width[i,]) 
       bufferlist[[i]]<-buffer}
     
     # Create names for all buffers in the list (which will be used as ID's)
