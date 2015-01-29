@@ -64,11 +64,15 @@ shinyServer(function(input, output){
     ## Calculate the breach area 
     # Get breach point(s) if filled in or uploaded correctly 
     RB2 <- as.integer(input$RB2) 
+    DEM <- DEM()
     
     # Extract breach width(S) and breach point(s)
     if (RB2 == 0){
-      # Get single breach width and point if width is higher than 0 
-      validate(need(input$breach.width!=0, "Enter a breach width higher than 0.\nA breach of 0 can't cause a flood.")) 
+      # Get cellsize for minimum breach width
+      cellsize <-xres(DEM)
+      
+      # Get single breach width and point if width is higher than 0
+      validate(need(input$breach.width>=cellsize, "Enter a breach width higher than 0.\nA breach of 0 can't cause a flood.\nThe minimum breach width should be the minimum cellsize of your input DEM")) 
       breach.width<- input$breach.width 
       breach.point<-matrix(c(input$coord.x, input$coord.y), nrow=1, ncol=2) 
       dimnames(breach.point)<-list(colnames(breach.point), c('x','y')) }#Names needed for creating spatialpoints  
@@ -124,7 +128,8 @@ shinyServer(function(input, output){
     
     # Create polygon and plot OSM
     SPS <- create.polygon(DEM)
-    plot(SPS, col='white', border='white', axes=T, bty='n',xaxs='i', yaxs='i', xlab='Longitude', ylab='Latitude')
+    plot(SPS, col='white', border='white', axes=T, bty='n',xaxs='i', yaxs='i', 
+         xlab='Longitude', ylab='Latitude',main="Waterdepth in flooded area's [m]")
     box("plot", col="white")  
     withProgress(plotRGB(raster(osm, crs=CRS(projection(flooded.area))),add=T), 
                  message = '(Re-)Calculation in progress',
@@ -144,9 +149,9 @@ shinyServer(function(input, output){
       plot(breach.area, add=T, col='red', border='red')
       
       # Create and add a North arrow that takes the extent of the plot in account
-      x.position<-extent(DEM)[1] + 0.1*(extent(DEM)[2]-extent(DEM)[1])
-      y.position<-extent(DEM)[4] - 0.15*(extent(DEM)[4]-extent(DEM)[3])
-      length <- (((extent(DEM)[4])-(extent(DEM)[3]))*0.035)
+      x.position<-extent(flooded.area)[1] + 0.1*(extent(flooded.area)[2]-extent(flooded.area)[1])
+      y.position<-extent(flooded.area)[4] - 0.15*(extent(flooded.area)[4]-extent(flooded.area)[3])
+      length <- (((extent(flooded.area)[4])-(extent(flooded.area)[3]))*0.035)
       north.arrow(xb=x.position, yb=y.position, len=length, lab="N")
       })
   })        

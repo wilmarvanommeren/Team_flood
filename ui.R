@@ -19,8 +19,8 @@ allcodes<-append(empty, allcodes)
 # Define UI for application that calculates and plots the flooded area
 shinyUI(
   fluidPage(
-    # Title
-    titlePanel(title="Simulate the flooded area's after a single or multiple breach(es)",windowTitle="Flood Risk Area's"),
+    # Title and tab-title in browser
+    titlePanel(title="Simulate the flooded area's after a single or multiple breach(es)",windowTitle="Simulate Flood Risk Area's"),
     # Sidebar
     sidebarLayout(
       sidebarPanel( 
@@ -75,13 +75,13 @@ shinyUI(
         h2("Help"),
         h4("1.Instructions"),
         h5('1.1 Digital Elevation Map [DEM] options'),
-        p("If option 'Use country' is used, the rasterfile of that country will be downloaded to your harddisk."),
+        p("If option 'Use country' is used, the rasterfile of that country will be downloaded to your harddisk. The minimum breachsize is 570 meter."),
         p("If option 'Upload region' is used, a rasterfile from your harddisk will be used in the calculation. Supported extensions are .tif and .grd. Digital elevation maps of the Netherlands are accesible"),
+        p("All input maps are converted to the Dutch",a('RD coordinate system.', href='http://en.wikipedia.org/wiki/Geography_of_the_Netherlands', target="_blank")),
         p('DEMs of the Netherlands are downloadable', a('here.', href='http://www.arcgis.com/home/webmap/viewer.html?webmap=ac6b6ecd42424e33bd0e6fa09499c563', target="_blank")),
         h5("1.2 Waterheight"),
         p("The sea level is the reference level. The minimum value of the breach is the minimum height value that is placed within the breach area. This minimum value is extracted from the DEM."),
         h5("1.3 Breach settings"),
-        p("All input maps are converted to the Dutch",a('RD coordinate system.', href='http://en.wikipedia.org/wiki/Geography_of_the_Netherlands', target="_blank")),
         p("If option 'single' is selected the coordinates of the single breach should be entered in the fields below the text 'Single breach. Coordinate unit is meters, because this is the unit of the RD coordinate system."),
         p("If option 'multiple' is selected a file can be uploaded that contains an x, y and breach width column (example image below). The supported extension is .csv."),
         img(src='CSVTableExample.png'),
@@ -94,6 +94,7 @@ shinyUI(
         h5("2.2 Error"),
         p("An error will be returned if there is not enough space available in the memory of the computer for the computation (",span("Error: cannot allocate vector of size x MB", style= "color:red"),"). This can be avoided by uploading or selecting a smaller file. A better pc would also help."),
         p("If 'Multiple' breaches is selected and the file format or extension is wrong, another error will be returned (",span("Error: object 'x' not found", style= "color:red"),"). Remember that the extension should be .csv and the file should contain three columns with x and y coordinates and the breach width. The names of the first columns should be respectively 'x' and 'y'."),
+        p("At last an error will appear if the breach width is too small. With a small breach width no area is flooded. The smalles breach width depends on the cellsize of the input DEM."),
         h5("2.3 Plot"),
         p("A White screen means the calculation is in progress, so there is no result yet. If the plot appears transparant this probably means you moved or resized the window of the browser. Somehow the calculation will start again."),
         br(),
