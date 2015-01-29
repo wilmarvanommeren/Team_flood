@@ -60,27 +60,28 @@ shinyServer(function(input, output){
   })
 
   RB2<- reactive({
+    ## Return single or multiple breaches radiobutton
     return(as.integer(input$RB2))
   })
   
   breach.area<- reactive({
     ## Calculate the breach area
-    # Get breach width if value is higher than 0
-#     validate(need(input$breach.width!=0, "Enter a breach width higher than 0.\nA breach of 0 can't cause a flood."))
-    
-    # Get breach point(s) if filled in or uploaded correctly
+    # Load data
     RB2 <- RB2()
     
+    # If 0(single) get breach point and width from input variables
     if (RB2 == 0){
       breach.point<- try(matrix(c(input$coord.x, input$coord.y), nrow=1, ncol=2))
       dimnames(breach.point)<-list(colnames(breach.point), c('x','y')) 
-      breach.width<- input$breach.width} 
+      breach.width<- input$breach.width}
+    # If not 0(multiple) and input$coords is NULL say upload a .csv file
     else if (is.null(input$coords)){
       validate(need(input$coords !=NULL, "Upload a .csv file with two columns representing the 'x' and 'y' coordinates.\nThe columns should be named 'x' and 'y'.\n Press 'Plot!' if uploaded!\n\nScroll down for help."))}
+    # If not 0(multiple) and input$coords is not NULL extract data
     else if (RB2==1){
       multiple.breach<- read.csv(input$coords$datapath)
-      breach.point <- subset(multiple.breach, select=1:2)
-      breach.width <- multiple.breach[3]}
+      breach.point <- try(subset(multiple.breach, select=1:2))
+      breach.width <- try(multiple.breach[3])}
     
     
     # Calculate breach area
@@ -139,10 +140,9 @@ shinyServer(function(input, output){
     
     
     # Plot base map and flooded.area 
-    
-    withProgress(plot(flooded.area, add=T, col=waterPallette), message = '(Re-)Calculation in progress',
+    if(breach.area!=NULL){withProgress(plot(flooded.area, add=T, col=waterPallette), message = '(Re-)Calculation in progress',
                  detail = 'Step 6: Plotting flooded area...')
-    plot(breach.area, add=T, col='red', border='red')})
+    plot(breach.area, add=T, col='red', border='red')}})
 })        
   
   output$hist <- renderPlot({
