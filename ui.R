@@ -2,8 +2,8 @@
 # Date: January 2015
 
 # Load & install packages if required
-if (!require(shiny)){install.packages("shiny")}
 if (!require(raster)){install.packages("raster")}
+if (!require(shiny)){install.packages("shiny")}
 
 # Set max upload size
 options(shiny.maxRequestSize = 30*1024^2)
@@ -29,7 +29,7 @@ shinyUI(
         # Upload a DEM or download a DEM
         radioButtons('RB1', 'Choose method', c('Use country'=0, 'Upload region'=1), inline=T),
         selectInput("country", label="Select country", choices=allcodes),
-        fileInput('DEM',label='Upload region (.tif, .grd)', accept=c('.tif','.grd')), 
+        fileInput('DEM',label='Upload region (.tif|.grd)', accept=c('.tif','.grd')), 
         # Input values for waterlevel and breach width
         numericInput("water.height", label= "Water level [m]",min=0, value=0),  
         # A single breach or multiple breaches
@@ -44,7 +44,7 @@ shinyUI(
         hr(style="border-color:gray;;"),
         # Upload coordinates for multiple breaches
         h4("Multiple breaches"),
-        fileInput('coords',label='Upload coordinates (.csv)', accept=c('.csv')),
+        fileInput('coords',label='Upload coordinates (.csv|.xls|.xlsx)', accept=c('.csv','.xls','.xlsx')),
         # Press go to plot the output (calculations have already started)
         actionButton("goButton","Plot!"),
         br(),
@@ -58,13 +58,15 @@ shinyUI(
         # Plot & textoutput
         plotOutput("plot", height='750px'),
         hr(),
-        plotOutput("hist"),
-        textOutput("total"),
+        htmlOutput("hist"),
+        br(),
+        htmlOutput("total"),
+        br(),
         textOutput("removed"),
         br(),# Help
         hr(style="border-color:black;"),
         # Project background information
-        p(strong("Authors:"), "Rob Maas & Wilmar van Ommeren"),
+        p(strong("Authors:"), "Wilmar van Ommeren & Rob Maas"),
         p(strong("Instance:"), "Wageningen University, Wageningen"),
         p(strong("Course:"), "Geo Scripting", a("GRS-51806", href="https://ssc.wur.nl/Studiegids/Vak/GRS-51806", target="_blank")),
         p(strong("Lecturers:"), "dr.ir. J.P. verbesselt, ing. W.T. ten Haaf, ir. A.R. Bergsma, ir. H.J. Stuiver, dr.ir. S. de Bruin, dr.ir. R.J.A. van Lammeren & L.P. Dutrieux"),
@@ -75,15 +77,15 @@ shinyUI(
         h2("Help"),
         h4("1.Instructions"),
         h5('1.1 Digital Elevation Map [DEM] options'),
-        p("If option 'Use country' is used, the rasterfile of that country will be downloaded to your harddisk. The minimum breachsize is 570 meter."),
+        p("If option 'Use country' is used, the rasterfile of that country will be downloaded to your harddisk. The minimum breachsize is shown in the tip section."),
         p("If option 'Upload region' is used, a rasterfile from your harddisk will be used in the calculation. Supported extensions are .tif and .grd. Digital elevation maps of the Netherlands are accesible"),
         p("All input maps are converted to the Dutch",a('RD coordinate system.', href='http://en.wikipedia.org/wiki/Geography_of_the_Netherlands', target="_blank")),
-        p('DEMs of the Netherlands are downloadable', a('here.', href='http://www.arcgis.com/home/webmap/viewer.html?webmap=ac6b6ecd42424e33bd0e6fa09499c563', target="_blank")),
+        p('DEMs of the Netherlands are freely downloadable', a('here.', href='http://www.arcgis.com/home/item.html?id=917565db27be4283989da1d64cf437a4', target="_blank")),
         h5("1.2 Waterheight"),
         p("The sea level is the reference level. The minimum value of the breach is the minimum height value that is placed within the breach area. This minimum value is extracted from the DEM."),
         h5("1.3 Breach settings"),
         p("If option 'single' is selected the coordinates of the single breach should be entered in the fields below the text 'Single breach. Coordinate unit is meters, because this is the unit of the RD coordinate system."),
-        p("If option 'multiple' is selected a file can be uploaded that contains an x, y and breach width column (example image below). The supported extension is .csv."),
+        p("If option 'multiple' is selected a file can be uploaded that contains an x, y and breach width column (example image below). The supported extensione are .csv, .xls and .xlsx."),
         img(src='CSVTableExample.png'),
         h5("1.4 Start calculation"),
         p("Press 'Go!' to start the calculation. This may take some time!"),
@@ -93,10 +95,10 @@ shinyUI(
         p("A DEM will be plotted if there is no flooded area present or if value's are not filled in correctly (e.g: 0 breach width, wrong coordinate units, wrong file extension)."),
         h5("2.2 Error"),
         p("An error will be returned if there is not enough space available in the memory of the computer for the computation (",span("Error: cannot allocate vector of size x MB", style= "color:red"),"). This can be avoided by uploading or selecting a smaller file. A better pc would also help."),
-        p("If 'Multiple' breaches is selected and the file format or extension is wrong, another error will be returned (",span("Error: object 'x' not found", style= "color:red"),"). Remember that the extension should be .csv and the file should contain three columns with x and y coordinates and the breach width. The names of the first columns should be respectively 'x' and 'y'."),
-        p("At last an error will appear if the breach width is too small. With a small breach width no area is flooded. The smalles breach width depends on the cellsize of the input DEM."),
+        p("If 'Multiple' breaches is selected and the file format or extension is wrong, another error will be returned (",span("Error: object 'x' not found or Error: invalid multibyte string 1", style= "color:red"),"). Remember that the extension should be .csv, .xls or .xlsx and the file should contain three columns with x and y coordinates and the breach width. The names of the first columns should be respectively 'x' and 'y'."),
         h5("2.3 Plot"),
         p("A White screen means the calculation is in progress, so there is no result yet. If the plot appears transparant this probably means you moved or resized the window of the browser. Somehow the calculation will start again."),
+        p("If 'multiple breaches' is selected stripes can occur in the plot, because not all flooded area's are connected. We are currently looking for a fix for this problem."),
         br(),
         h4("3.Examples"),
         h5("2.1 Single breach"),

@@ -17,5 +17,8 @@ merge.breach.DEM <- function(breach.area,DEM){
     DEM<- merge(poly.rast, DEM)
   }
   
-  return (DEM)
+  # Retrieve minimum breach height value for the shiny app
+  min.breach.height <- max(min.breach)
+  
+  return (c(DEM,min.breach.height))
 }
