@@ -16,7 +16,7 @@ allcountry<-alldata[,2]
 names(allcodes)<-allcountry
 allcodes<-append(empty, allcodes)
 
-# Define UI for application that calculates and plots the flooded area
+# Define UI for application that returns inputvariables and shows the output
 shinyUI(
   fluidPage(
     # Title and tab-title in browser
@@ -93,10 +93,7 @@ shinyUI(
         h4("2.Unexpected outcomes"),
         h5("2.1 DEM"),
         p("A DEM will be plotted if there is no flooded area present or if value's are not filled in correctly (e.g: 0 breach width, wrong coordinate units, wrong file extension)."),
-        h5("2.2 Error"),
-        p("An error will be returned if there is not enough space available in the memory of the computer for the computation (",span("Error: cannot allocate vector of size x MB", style= "color:red"),"). This can be avoided by uploading or selecting a smaller file. A better pc would also help."),
-        p("If 'Multiple' breaches is selected and the file format or extension is wrong, another error will be returned (",span("Error: object 'x' not found or Error: invalid multibyte string 1", style= "color:red"),"). Remember that the extension should be .csv, .xls or .xlsx and the file should contain three columns with x and y coordinates and the breach width. The names of the first columns should be respectively 'x' and 'y'."),
-        h5("2.3 Plot"),
+        h5("2.2 Plot"),
         p("A White screen means the calculation is in progress, so there is no result yet. If the plot appears transparant this probably means you moved or resized the window of the browser. Somehow the calculation will start again."),
         p("If 'multiple breaches' is selected stripes can occur in the plot, because not all flooded area's are connected. We are currently looking for a fix for this problem."),
         br(),
